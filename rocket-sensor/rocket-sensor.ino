@@ -19,6 +19,6 @@ void loop() {
         eeprom_write_float(0, max_alt);
     }
 
-    delay(100);
+    delay(500);
 
 }

@@ -11,14 +11,16 @@ void setup() {
 }
 
 void loop() {
+    digitalWrite(1, LOW);
     float pressure = getPressure();
     float seaLevelPressure = SENSORS_PRESSURE_SEALEVELHPA;
     float altitude = pressureToAltitude(seaLevelPressure, pressure/100);
     if(altitude > max_alt) {
+        digitalWrite(1, HIGH);
         max_alt = altitude;
         eeprom_write_float(0, max_alt);
     }
 
-    delay(500);
+    delay(100);
 
 }

@@ -1,4 +1,5 @@
 #include "VESCPacket.h"
+#include <string.h>
 byte* inByte;
 byte id = 100;
 char* outByte;
@@ -22,10 +23,10 @@ void loop() {
       ReadVESCMessage(inByte);
       UnpackMessage(inByte, sizeof(inByte)/sizeof(byte), payload, &lenPay);
       if(payload[0] == 36){ // subscription request
-        char msg[] = {'t','e','s','t'}; 
+        char msg[] = "test"; 
         //memcpy(payload, msg, length(msg));
         
-        SendVESCPacket((uint8_t*)msg, sizeof(msg)/sizeof(char));
+        SendVESCPacket((uint8_t*)msg, strlen(msg));
       }
       if(payload[0] == 1){
         if(payload[1] == 1){
@@ -34,9 +35,10 @@ void loop() {
           digitalWrite(13, LOW);
         }
       }
-   } else if(cnt++ > 2000){
-      char msg[] = {'H','E','L','L','O'};
-      SendVESCPacket((uint8_t*)msg, sizeof(msg)/sizeof(char));
+   }
+   if(cnt++ > 100000){
+      char msg[] = "Hello";
+      SendVESCPacket((uint8_t*)msg, strlen(msg));
       cnt = 0;
    }
 }

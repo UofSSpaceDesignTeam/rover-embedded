@@ -40,11 +40,22 @@ unsigned short crc16(unsigned char *buf, unsigned int len) {
   return cksum;
 }
 
-int SendVESCPacket(uint8_t* payload, int lenPay){
-  uint16_t crcPayload = crc16(payload, lenPay);
+int SendVESCPacket(uint8_t* key, int lenKey, uint8_t* value, int lenValue){
+  uint16_t crcPayload;
   int count = 0;
   uint8_t messageSend[256];
+  int lenPay = lenKey+lenValue+2;
+  uint8_t payload[lenPay];
+  int countPay;
 
+  payload[countPay++] = lenKey;
+  memcpy(&payload[countPay], key, lenKey);
+
+  countPay += lenKey;
+
+  payload[countPay++] = lenValue;
+  memcpy(&payload[countPay], value, lenValue);
+  crcPayload = crc16(payload, lenPay);
   if (lenPay <= 256)
   {
     messageSend[count++] = 2;

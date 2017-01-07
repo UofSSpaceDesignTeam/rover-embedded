@@ -23,10 +23,11 @@ void loop() {
       ReadVESCMessage(inByte);
       UnpackMessage(inByte, sizeof(inByte)/sizeof(byte), payload, &lenPay);
       if(payload[0] == 36){ // subscription request
+        char key[] = "ID";
         char msg[] = "test"; 
         //memcpy(payload, msg, length(msg));
         
-        SendVESCPacket((uint8_t*)msg, strlen(msg));
+        SendVESCPacket((uint8_t*)key, strlen(key), (uint8_t*)msg, strlen(msg));
       }
       if(payload[0] == 1){
         if(payload[1] == 1){
@@ -37,8 +38,9 @@ void loop() {
       }
    }
    if(cnt++ > 100000){
+      char key[] = "TestOut";
       char msg[] = "Hello";
-      SendVESCPacket((uint8_t*)msg, strlen(msg));
+      SendVESCPacket((uint8_t*)key, strlen(key), (uint8_t*)msg, strlen(msg));
       cnt = 0;
    }
 }

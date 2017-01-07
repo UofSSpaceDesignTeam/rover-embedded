@@ -10,7 +10,7 @@ unsigned short crc16(unsigned char *buf, unsigned int len);
  * Sends a message payload of lenght lenPay to another VESC device over serial.
  * Returns the number of bytes that were sent.
  */
-int SendVESCPacket(uint8_t* payload, int lenPay);
+int SendVESCPacket(uint8_t* key, int lenKey, uint8_t* value, int lenValue);
 
 /*
  * Takes a message recieved over serial, and extracts it to a usable payload.

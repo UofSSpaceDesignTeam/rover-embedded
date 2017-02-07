@@ -20,22 +20,25 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if(Serial.available()>0){
-      ReadVESCMessage(inByte);
-      UnpackMessage(inByte, sizeof(inByte)/sizeof(byte), payload, &lenPay);
+      int bytes_read = ReadVESCPacket(inByte, 256);
+      UnpackMessage(inByte, bytes_read, payload, &lenPay);
       if(payload[0] == REQ_SUBSCRIPTION){ // subscription request
         char msg[] = "blink"; 
-        
         SendVESCPacket(36, msg, strlen(msg));
       }
       if(payload[0] == BLINK_LED){
-        if(payload[1] == 1){
+        if(*(int*)(payload + 1) >= 1){ // arduino is little endian, network is big :(
           digitalWrite(13,HIGH);
-        } else if(payload[1] == 0){
+        } else if(*(int*)(payload + 1) == 0){
           digitalWrite(13, LOW);
         }
+      } else {
+        inByte[bytes_read+1] = '\0';
+        Serial.println((char*)inByte);
       }
    }
    if(cnt++ > 100000){
+      //char *msg = "test";
       //SendVESCPacket(37, (void*)msg, strlen(msg));
       cnt = 0;
    }

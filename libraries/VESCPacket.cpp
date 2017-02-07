@@ -40,46 +40,55 @@ unsigned short crc16(unsigned char *buf, unsigned int len) {
   return cksum;
 }
 
-int SendVESCPacket(uint8_t* payload, int lenPay){
-  uint16_t crcPayload = crc16(payload, lenPay);
-  int count = 0;
-  uint8_t messageSend[256];
+int SendVESCPacket(int msgID, void* value, int lenValue){
+  uint16_t crcPayload;
 
+  int lenPay = lenValue + 1; // ID + message
+  uint8_t payload[lenPay];
+  int payload_idx = 0;
+  int packet_idx = 0; 
+  uint8_t packet[lenPay+7]; // header(2 | 3) + 1-2 byte length + 2 byte crc + footer(3) + "\0"
+
+  // create payload first
+  //payload[payload_idx++] = lenValue;
+  payload[payload_idx++] = msgID;
+  memcpy(&payload[payload_idx], value, lenValue);
+  crcPayload = crc16(payload, lenPay);
+
+  //Create packet from payload
   if (lenPay <= 256)
   {
-    messageSend[count++] = 2;
-    messageSend[count++] = lenPay;
+    packet[packet_idx++] = 2;
+    packet[packet_idx++] = lenPay;
   }
   else
   {
-    messageSend[count++] = 3;
-    messageSend[count++] = (uint8_t)(lenPay >> 8);
-    messageSend[count++] = (uint8_t)(lenPay & 0xFF);
+    packet[packet_idx++] = 3;
+    packet[packet_idx++] = (uint8_t)(lenPay >> 8);
+    packet[packet_idx++] = (uint8_t)(lenPay & 0xFF);
   }
-  memcpy(&messageSend[count], payload, lenPay);
-
-  count += lenPay;
-  messageSend[count++] = (uint8_t)(crcPayload >> 8);
-  messageSend[count++] = (uint8_t)(crcPayload & 0xFF);
-  messageSend[count++] = 3;
-  messageSend[count] = NULL;
+  memcpy(&packet[packet_idx], payload, lenPay);
+  packet_idx += lenPay;
+  packet[packet_idx++] = (uint8_t)(crcPayload >> 8);
+  packet[packet_idx++] = (uint8_t)(crcPayload & 0xFF);
+  packet[packet_idx++] = 3;
+  packet[packet_idx] = NULL; // we will treat the packet as a string on the next line
 
   //Sending package
-  Serial.println((char*)messageSend);
-
+  Serial.print((char*)packet);
+  Serial.print("\n");
 
   //Returns number of send bytes
-return count;
-  }
+  return packet_idx;
+}
 
 bool UnpackMessage(uint8_t* message, int lenMes, uint8_t* payload, int* lenPay) {
   uint16_t crcMessage = 0;
   uint16_t crcPayload = 0;
+  *lenPay = message[1];
   crcMessage = message[lenMes - 3] << 8;
   crcMessage &= 0xFF00;
-  crcMessage += message[lenMes - 2];
-  *lenPay = message[1];
-
+  crcMessage |= (message[lenMes - 2]) & 0x00FF;
   //Extract payload:
   memcpy(payload, &message[2], message[1]);
 
@@ -88,14 +97,35 @@ bool UnpackMessage(uint8_t* message, int lenMes, uint8_t* payload, int* lenPay) 
   return crcPayload == crcMessage;
 }
 
-int ReadVESCMessage(byte* buffer){
+int ReadVESCPacket(byte* buffer, int max_len){
   int count = 0;
+  int len = 0;
+  
   buffer[count++] = Serial.read();
-  buffer[count++] = Serial.read();
-  int len = buffer[1];
-  for(int i = 0; i< len; i++)
+  if(buffer[0] == 2) { // single byte length field
     buffer[count++] = Serial.read();
-  buffer[count++] = Serial.read();
-  buffer[count++] = Serial.read();
-  buffer[count++] = Serial.read();
+    len = buffer[1];
+  } else if(buffer[0] == 3) { // two byte length field
+    buffer[count++] = Serial.read();
+    buffer[count++] = Serial.read();
+    len = (buffer[1] << 8) & 0xFF00;
+    len |= buffer[2] & 0x00FF;
+  } else {
+    return -1; // invalid header
   }
+  
+  if(len > max_len) {
+    return -2; // buffer not long enough to fit message
+  }
+  
+  for(int i = 0; i< len; i++) // read in each byte of the message
+    buffer[count++] = Serial.read();
+    
+  buffer[count++] = Serial.read(); // checksum byte 1
+  buffer[count++] = Serial.read(); // checksum byte 2
+  buffer[count] = Serial.read(); // footer (3)
+  if(buffer[count] != 3) {
+    return -3; // bad footer
+  }
+  return count;
+}

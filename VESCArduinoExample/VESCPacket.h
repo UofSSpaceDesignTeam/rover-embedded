@@ -27,9 +27,9 @@ int SendVESCPacket(int msgID, void* value, int lenValue);
 bool UnpackMessage(uint8_t* message, int lenMes, uint8_t* payload, int* lenPay);
 
 /*
- * Reads a message from another VESC device over serial.
- * The message is coppied into buffer.
+ * Reads a packet from another VESC device over serial.
+ * The packet is coppied into buffer.
  */
-int ReadVESCMessage(byte* buffer);
+int ReadVESCPacket(byte* buffer, int max_len);
 
 #endif

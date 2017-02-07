@@ -22,14 +22,12 @@ void loop() {
   if(Serial.available()>0){
       ReadVESCMessage(inByte);
       UnpackMessage(inByte, sizeof(inByte)/sizeof(byte), payload, &lenPay);
-      if(payload[0] == 36){ // subscription request
-        char key[] = "ID";
-        char msg[] = "test"; 
-        //memcpy(payload, msg, length(msg));
+      if(payload[0] == REQ_SUBSCRIPTION){ // subscription request
+        char msg[] = "blink"; 
         
-        SendVESCPacket((uint8_t*)key, strlen(key), (uint8_t*)msg, strlen(msg));
+        SendVESCPacket(36, msg, strlen(msg));
       }
-      if(payload[0] == 1){
+      if(payload[0] == BLINK_LED){
         if(payload[1] == 1){
           digitalWrite(13,HIGH);
         } else if(payload[1] == 0){
@@ -38,9 +36,7 @@ void loop() {
       }
    }
    if(cnt++ > 100000){
-      char key[] = "TestOut";
-      char msg[] = "Hello";
-      SendVESCPacket((uint8_t*)key, strlen(key), (uint8_t*)msg, strlen(msg));
+      //SendVESCPacket(37, (void*)msg, strlen(msg));
       cnt = 0;
    }
 }

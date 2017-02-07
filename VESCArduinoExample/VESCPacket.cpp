@@ -40,48 +40,47 @@ unsigned short crc16(unsigned char *buf, unsigned int len) {
   return cksum;
 }
 
-int SendVESCPacket(uint8_t* key, int lenKey, uint8_t* value, int lenValue){
+int SendVESCPacket(int msgID, void* value, int lenValue){
   uint16_t crcPayload;
-  int count = 0;
-  uint8_t messageSend[256];
-  int lenPay = lenKey+lenValue+2;
+
+  int lenPay = lenValue + 1; // ID + message
   uint8_t payload[lenPay];
-  int countPay;
+  int payload_idx = 0;
+  int packet_idx = 0; 
+  uint8_t packet[lenPay+7]; // header(2 | 3) + 1-2 byte length + 2 byte crc + footer(3) + "\0"
 
-  payload[countPay++] = lenKey;
-  memcpy(&payload[countPay], key, lenKey);
-
-  countPay += lenKey;
-
-  payload[countPay++] = lenValue;
-  memcpy(&payload[countPay], value, lenValue);
+  // create payload first
+  //payload[payload_idx++] = lenValue;
+  payload[payload_idx++] = msgID;
+  memcpy(&payload[payload_idx], value, lenValue);
   crcPayload = crc16(payload, lenPay);
+
+  //Create packet from payload
   if (lenPay <= 256)
   {
-    messageSend[count++] = 2;
-    messageSend[count++] = lenPay;
+    packet[packet_idx++] = 2;
+    packet[packet_idx++] = lenPay;
   }
   else
   {
-    messageSend[count++] = 3;
-    messageSend[count++] = (uint8_t)(lenPay >> 8);
-    messageSend[count++] = (uint8_t)(lenPay & 0xFF);
+    packet[packet_idx++] = 3;
+    packet[packet_idx++] = (uint8_t)(lenPay >> 8);
+    packet[packet_idx++] = (uint8_t)(lenPay & 0xFF);
   }
-  memcpy(&messageSend[count], payload, lenPay);
-
-  count += lenPay;
-  messageSend[count++] = (uint8_t)(crcPayload >> 8);
-  messageSend[count++] = (uint8_t)(crcPayload & 0xFF);
-  messageSend[count++] = 3;
-  messageSend[count] = NULL;
+  memcpy(&packet[packet_idx], payload, lenPay);
+  packet_idx += lenPay;
+  packet[packet_idx++] = (uint8_t)(crcPayload >> 8);
+  packet[packet_idx++] = (uint8_t)(crcPayload & 0xFF);
+  packet[packet_idx++] = 3;
+  packet[packet_idx] = NULL; // we will treat the packet as a string on the next line
 
   //Sending package
-  Serial.println((char*)messageSend);
-
+  Serial.print((char*)packet);
+  Serial.print("\n");
 
   //Returns number of send bytes
-return count;
-  }
+  return packet_idx;
+}
 
 bool UnpackMessage(uint8_t* message, int lenMes, uint8_t* payload, int* lenPay) {
   uint16_t crcMessage = 0;

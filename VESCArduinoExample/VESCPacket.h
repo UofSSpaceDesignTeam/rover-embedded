@@ -1,6 +1,12 @@
 #ifndef VESCPACKET_H_
 #define VESCPACKET_H_
 
+#define NR_MSGS 40
+
+extern void (*msg_callbacks[NR_MSGS + 1])(byte *payload);
+
+void sendSubscriptions(byte *payload);
+
 /*
  * Message types.
  */
@@ -8,6 +14,18 @@ typedef enum {
   REQ_SUBSCRIPTION = 36,
   BLINK_LED = 40
 } message_t;
+
+/*
+ * Initialize all the callbacks in the look up table to NULL.
+ */
+void init_msg_callbacks(void);
+
+/*
+ * Subscribe to a message by message id.
+ * Takes in the message id of the VESC message, and
+ * A call back function to call when that message is received
+ */
+void subscribe(int msg_id, void (*callback)(byte *payload));
 
 /*
  * Calculates the check sum of a message contained in buf of length len

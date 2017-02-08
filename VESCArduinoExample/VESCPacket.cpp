@@ -1,5 +1,26 @@
 #include <Arduino.h>
-//#include <VESCPacket.h>
+
+#include "VESCPacket.h"
+
+void (*msg_callbacks[NR_MSGS+1])(byte *payload);
+
+void sendSubscriptions(byte *payload) {
+  char msg[] = "blink";
+  SendVESCPacket(REQ_SUBSCRIPTION, msg, strlen(msg));
+}
+
+void init_msg_callbacks(void) {
+  for(int i=0; i<=NR_MSGS; i++) {
+    msg_callbacks[i] = NULL;
+  }
+  msg_callbacks[REQ_SUBSCRIPTION] = sendSubscriptions;
+}
+
+void subscribe(int msg_id, void (*callback)(byte *payload)) {
+  if(msg_id >= 0 && msg_id <= NR_MSGS) {
+    msg_callbacks[msg_id] = callback;
+  }
+}
 
 const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
     0x50a5, 0x60c6, 0x70e7, 0x8108, 0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad,
@@ -30,6 +51,7 @@ const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
     0x9de8, 0x8dc9, 0x7c26, 0x6c07, 0x5c64, 0x4c45, 0x3ca2, 0x2c83, 0x1ce0,
     0x0cc1, 0xef1f, 0xff3e, 0xcf5d, 0xdf7c, 0xaf9b, 0xbfba, 0x8fd9, 0x9ff8,
     0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0 };
+
 
 unsigned short crc16(unsigned char *buf, unsigned int len) {
   unsigned int i;
@@ -129,3 +151,6 @@ int ReadVESCPacket(byte* buffer, int max_len){
   }
   return count;
 }
+
+
+

@@ -152,5 +152,30 @@ int ReadVESCPacket(byte* buffer, int max_len){
   return count;
 }
 
+/* 
+ *  serialEvent is called whenever data is send to the arduino over serial.
+ *  https://www.arduino.cc/en/Reference/SerialEvent
+ */
+void serialEvent() {
+  byte inByte[256];
+  byte payload[256];
+  int lenPay = 0;
+  int bytes_read;
+  noInterrupts(); // make sure we can only handle one message at a time.
+  if(Serial.available()) {
+      // read and parse vesc message
+      bytes_read = ReadVESCPacket(inByte, 256);
+      UnpackMessage(inByte, bytes_read, payload, &lenPay);
+
+      // make sure it contains a valid message id
+      if(payload[0] >= 0 && payload[0] <= NR_MSGS) {
+        // If a callback was registered, call it
+        if(msg_callbacks[payload[0]] != NULL) {
+          msg_callbacks[payload[0]](payload);
+        }
+      }
+  }
+  interrupts(); // re-enable interrupts
+}
 
 

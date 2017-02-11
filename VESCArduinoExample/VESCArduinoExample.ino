@@ -1,11 +1,11 @@
 #include "VESCPacket.h"
 #include <string.h>
 
-
 void blink_led(byte* payload) {
-  if(*(int*)(payload + 1) >= 1){ // arduino is little endian, network is big :(
+  BlinkMessage msg = BlinkMessage(payload);
+  if(msg.value == 1){ // arduino is little endian, network is big :(
     digitalWrite(13,HIGH);
-  } else if(*(int*)(payload + 1) == 0){
+  } else if(msg.value == 0){
     digitalWrite(13, LOW);
   }
 }

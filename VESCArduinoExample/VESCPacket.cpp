@@ -5,8 +5,10 @@
 void (*msg_callbacks[NR_MSGS+1])(byte *payload);
 
 void sendSubscriptions(byte *payload) {
-  char msg[] = "blink";
-  SendVESCPacket(REQ_SUBSCRIPTION, msg, strlen(msg));
+  SubscribeMessage sub = SubscribeMessage(NULL);
+  sub.subscription = "blink";
+  sub.length = strlen("blink");
+  SendVESCPacket(&sub);
 }
 
 void init_msg_callbacks(void) {
@@ -62,19 +64,15 @@ unsigned short crc16(unsigned char *buf, unsigned int len) {
   return cksum;
 }
 
-int SendVESCPacket(int msgID, void* value, int lenValue){
+int SendVESCPacket(VESCMessage *msg){
   uint16_t crcPayload;
 
-  int lenPay = lenValue + 1; // ID + message
-  uint8_t payload[lenPay];
-  int payload_idx = 0;
+  int lenPay = msg->length + 1; // ID + message
+  uint8_t *payload = msg->encode();;
   int packet_idx = 0; 
   uint8_t packet[lenPay+7]; // header(2 | 3) + 1-2 byte length + 2 byte crc + footer(3) + "\0"
 
   // create payload first
-  //payload[payload_idx++] = lenValue;
-  payload[payload_idx++] = msgID;
-  memcpy(&payload[payload_idx], value, lenValue);
   crcPayload = crc16(payload, lenPay);
 
   //Create packet from payload
@@ -94,11 +92,12 @@ int SendVESCPacket(int msgID, void* value, int lenValue){
   packet[packet_idx++] = (uint8_t)(crcPayload >> 8);
   packet[packet_idx++] = (uint8_t)(crcPayload & 0xFF);
   packet[packet_idx++] = 3;
-  packet[packet_idx] = NULL; // we will treat the packet as a string on the next line
+  packet[packet_idx] = '\0'; // we will treat the packet as a string on the next line
 
   //Sending package
   Serial.print((char*)packet);
   Serial.print("\n");
+  free(payload); // this was allocated in msg.encode()
 
   //Returns number of send bytes
   return packet_idx;
@@ -178,17 +177,23 @@ void serialEvent() {
   interrupts(); // re-enable interrupts
 }
 
+byte *SubscribeMessage::encode() {
+    byte *payload = (byte *)malloc(length + 1);
+    payload[0] = id;
+    memcpy(payload+1, subscription, length);
+    return payload;
+}
 
 /*
  * Define your message constructor to parse the
  * payload byte array to populate the appropriate
  * values in the class
  */
-BlinkMessage::BlinkMessage(byte *payload) {
-    int32_t index = 1;
-    value = buffer_get_int32(payload, &index);
+BlinkMessage::BlinkMessage(byte *payload) : VESCMessage(payload) {
+        int32_t index = 1;
+        value = buffer_get_int32(payload, &index);
+        length = sizeof(int);
 }
-
 
 
 /*

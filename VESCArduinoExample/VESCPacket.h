@@ -24,6 +24,7 @@ void buffer_append_bool(uint8_t *buffer,bool value, int32_t *index);
 #define NR_MSGS 40
 
 extern void (*msg_callbacks[NR_MSGS + 1])(byte *payload);
+extern char *msg_names[NR_MSGS];
 
 /*
  * Message types.
@@ -33,15 +34,16 @@ typedef enum {
   BLINK_LED = 40
 } message_t;
 
+
 class VESCMessage {
 public:
     int id;
     int length;
-    VESCMessage(byte *payload){
+    VESCMessage(){
         id = 0;
         length = 0;
     }
-    virtual byte *encode() {return NULL;}
+    virtual byte *encode() =0;
 };
 
 /*
@@ -89,7 +91,7 @@ class SubscribeMessage : public VESCMessage {
 public:
     int id = 36;
     char *subscription;
-    SubscribeMessage(byte *payload) : VESCMessage(payload) {}
+    SubscribeMessage(char *sub);
     byte *encode();
 };
 
@@ -104,6 +106,7 @@ public:
     int id = 40;
     int value; // should just be 0 or 1
     BlinkMessage(byte *payload);
+    byte *encode() {return NULL;}
 };
 
 

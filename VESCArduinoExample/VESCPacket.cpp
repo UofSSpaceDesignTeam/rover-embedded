@@ -3,11 +3,12 @@
 #include "VESCPacket.h"
 
 void (*msg_callbacks[NR_MSGS+1])(byte *payload);
+char *msg_names[NR_MSGS];
+char *g_subscriptions;
 
 void sendSubscriptions(byte *payload) {
-  SubscribeMessage sub = SubscribeMessage(NULL);
-  sub.subscription = "blink";
-  sub.length = strlen("blink");
+  SubscribeMessage sub = SubscribeMessage(g_subscriptions);
+  Serial1.println(sub.subscription); // Hacks; won't work with out this for some reason...
   SendVESCPacket(&sub);
 }
 
@@ -16,11 +17,13 @@ void init_msg_callbacks(void) {
     msg_callbacks[i] = NULL;
   }
   msg_callbacks[REQ_SUBSCRIPTION] = sendSubscriptions;
+  msg_names[BLINK_LED] = "bink";
 }
 
 void subscribe(int msg_id, void (*callback)(byte *payload)) {
   if(msg_id >= 0 && msg_id <= NR_MSGS) {
     msg_callbacks[msg_id] = callback;
+    g_subscriptions = msg_names[msg_id];
   }
 }
 
@@ -177,6 +180,10 @@ void serialEvent() {
   interrupts(); // re-enable interrupts
 }
 
+/*
+ * The encode method is for converting your message object
+ * to a binary representation.
+ */
 byte *SubscribeMessage::encode() {
     byte *payload = (byte *)malloc(length + 1);
     payload[0] = id;
@@ -185,11 +192,20 @@ byte *SubscribeMessage::encode() {
 }
 
 /*
+ * You can write constructors to create messages
+ * based on the data you want to initialize the fields with.
+ */
+SubscribeMessage::SubscribeMessage(char *sub) {
+  strcpy(this->subscription, sub);
+  length = strlen(sub);
+}
+
+/*
  * Define your message constructor to parse the
  * payload byte array to populate the appropriate
  * values in the class
  */
-BlinkMessage::BlinkMessage(byte *payload) : VESCMessage(payload) {
+BlinkMessage::BlinkMessage(byte *payload){
         int32_t index = 1;
         value = buffer_get_int32(payload, &index);
         length = sizeof(int);

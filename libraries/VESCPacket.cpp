@@ -1,5 +1,31 @@
 #include <Arduino.h>
-//#include <VESCPacket.h>
+
+#include "VESCPacket.h"
+
+void (*msg_callbacks[NR_MSGS+1])(byte *payload);
+char *msg_names[NR_MSGS];
+char *g_subscriptions;
+
+void sendSubscriptions(byte *payload) {
+  SubscribeMessage sub = SubscribeMessage(g_subscriptions);
+  Serial1.println(sub.subscription); // Hacks; won't work with out this for some reason...
+  SendVESCPacket(&sub);
+}
+
+void init_msg_callbacks(void) {
+  for(int i=0; i<=NR_MSGS; i++) {
+    msg_callbacks[i] = NULL;
+  }
+  msg_callbacks[REQ_SUBSCRIPTION] = sendSubscriptions;
+  msg_names[BLINK_LED] = "bink";
+}
+
+void subscribe(int msg_id, void (*callback)(byte *payload)) {
+  if(msg_id >= 0 && msg_id <= NR_MSGS) {
+    msg_callbacks[msg_id] = callback;
+    g_subscriptions = msg_names[msg_id];
+  }
+}
 
 const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
     0x50a5, 0x60c6, 0x70e7, 0x8108, 0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad,
@@ -31,6 +57,7 @@ const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
     0x0cc1, 0xef1f, 0xff3e, 0xcf5d, 0xdf7c, 0xaf9b, 0xbfba, 0x8fd9, 0x9ff8,
     0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0 };
 
+
 unsigned short crc16(unsigned char *buf, unsigned int len) {
   unsigned int i;
   unsigned short cksum = 0;
@@ -40,19 +67,15 @@ unsigned short crc16(unsigned char *buf, unsigned int len) {
   return cksum;
 }
 
-int SendVESCPacket(int msgID, void* value, int lenValue){
+int SendVESCPacket(VESCMessage *msg){
   uint16_t crcPayload;
 
-  int lenPay = lenValue + 1; // ID + message
-  uint8_t payload[lenPay];
-  int payload_idx = 0;
+  int lenPay = msg->length + 1; // ID + message
+  uint8_t *payload = msg->encode();;
   int packet_idx = 0; 
   uint8_t packet[lenPay+7]; // header(2 | 3) + 1-2 byte length + 2 byte crc + footer(3) + "\0"
 
   // create payload first
-  //payload[payload_idx++] = lenValue;
-  payload[payload_idx++] = msgID;
-  memcpy(&payload[payload_idx], value, lenValue);
   crcPayload = crc16(payload, lenPay);
 
   //Create packet from payload
@@ -72,11 +95,12 @@ int SendVESCPacket(int msgID, void* value, int lenValue){
   packet[packet_idx++] = (uint8_t)(crcPayload >> 8);
   packet[packet_idx++] = (uint8_t)(crcPayload & 0xFF);
   packet[packet_idx++] = 3;
-  packet[packet_idx] = NULL; // we will treat the packet as a string on the next line
+  packet[packet_idx] = '\0'; // we will treat the packet as a string on the next line
 
   //Sending package
   Serial.print((char*)packet);
   Serial.print("\n");
+  free(payload); // this was allocated in msg.encode()
 
   //Returns number of send bytes
   return packet_idx;
@@ -128,4 +152,138 @@ int ReadVESCPacket(byte* buffer, int max_len){
     return -3; // bad footer
   }
   return count;
+}
+
+/* 
+ *  serialEvent is called whenever data is send to the arduino over serial.
+ *  https://www.arduino.cc/en/Reference/SerialEvent
+ */
+void serialEvent() {
+  byte inByte[256];
+  byte payload[256];
+  int lenPay = 0;
+  int bytes_read;
+  noInterrupts(); // make sure we can only handle one message at a time.
+  if(Serial.available()) {
+      // read and parse vesc message
+      bytes_read = ReadVESCPacket(inByte, 256);
+      UnpackMessage(inByte, bytes_read, payload, &lenPay);
+
+      // make sure it contains a valid message id
+      if(payload[0] >= 0 && payload[0] <= NR_MSGS) {
+        // If a callback was registered, call it
+        if(msg_callbacks[payload[0]] != NULL) {
+          msg_callbacks[payload[0]](payload);
+        }
+      }
+  }
+  interrupts(); // re-enable interrupts
+}
+
+/*
+ * The encode method is for converting your message object
+ * to a binary representation.
+ */
+byte *SubscribeMessage::encode() {
+    byte *payload = (byte *)malloc(length + 1);
+    payload[0] = id;
+    memcpy(payload+1, subscription, length);
+    return payload;
+}
+
+/*
+ * You can write constructors to create messages
+ * based on the data you want to initialize the fields with.
+ */
+SubscribeMessage::SubscribeMessage(char *sub) {
+  strcpy(this->subscription, sub);
+  length = strlen(sub);
+}
+
+/*
+ * Define your message constructor to parse the
+ * payload byte array to populate the appropriate
+ * values in the class
+ */
+BlinkMessage::BlinkMessage(byte *payload){
+        int32_t index = 1;
+        value = buffer_get_int32(payload, &index);
+        length = sizeof(int);
+}
+
+
+/*
+ * The following are taken from Benjamin Vedder's bldc firmware:
+ * https://github.com/vedderb/bldc/blob/master/buffer.c
+ */
+void buffer_append_int16(uint8_t* buffer, int16_t number, int32_t *index) {
+    buffer[(*index)++] = number >> 8;
+    buffer[(*index)++] = number;
+}
+
+void buffer_append_uint16(uint8_t* buffer, uint16_t number, int32_t *index) {
+    buffer[(*index)++] = number >> 8;
+    buffer[(*index)++] = number;
+}
+
+void buffer_append_int32(uint8_t* buffer, int32_t number, int32_t *index) {
+    buffer[(*index)++] = number >> 24;
+    buffer[(*index)++] = number >> 16;
+    buffer[(*index)++] = number >> 8;
+    buffer[(*index)++] = number;
+}
+
+void buffer_append_uint32(uint8_t* buffer, uint32_t number, int32_t *index) {
+    buffer[(*index)++] = number >> 24;
+    buffer[(*index)++] = number >> 16;
+    buffer[(*index)++] = number >> 8;
+    buffer[(*index)++] = number;
+}
+
+void buffer_append_float16(uint8_t* buffer, float number, float scale, int32_t *index) {
+    buffer_append_int16(buffer, (int16_t)(number * scale), index);
+}
+
+void buffer_append_float32(uint8_t* buffer, float number, float scale, int32_t *index) {
+    buffer_append_int32(buffer, (int32_t)(number * scale), index);
+}
+
+int16_t buffer_get_int16(const uint8_t *buffer, int32_t *index) {
+    int16_t res =	((uint16_t) buffer[*index]) << 8 |
+        ((uint16_t) buffer[*index + 1]);
+    *index += 2;
+    return res;
+}
+
+uint16_t buffer_get_uint16(const uint8_t *buffer, int32_t *index) {
+    uint16_t res = 	((uint16_t) buffer[*index]) << 8 |
+        ((uint16_t) buffer[*index + 1]);
+    *index += 2;
+    return res;
+}
+
+int32_t buffer_get_int32(const uint8_t *buffer, int32_t *index) {
+    int32_t res =	((uint32_t) buffer[*index]) << 24 |
+        ((uint32_t) buffer[*index + 1]) << 16 |
+        ((uint32_t) buffer[*index + 2]) << 8 |
+        ((uint32_t) buffer[*index + 3]);
+    *index += 4;
+    return res;
+}
+
+uint32_t buffer_get_uint32(const uint8_t *buffer, int32_t *index) {
+    uint32_t res =	((uint32_t) buffer[*index]) << 24 |
+        ((uint32_t) buffer[*index + 1]) << 16 |
+        ((uint32_t) buffer[*index + 2]) << 8 |
+        ((uint32_t) buffer[*index + 3]);
+    *index += 4;
+    return res;
+}
+
+float buffer_get_float16(const uint8_t *buffer, float scale, int32_t *index) {
+    return (float)buffer_get_int16(buffer, index) / scale;
+}
+
+float buffer_get_float32(const uint8_t *buffer, float scale, int32_t *index) {
+    return (float)buffer_get_int32(buffer, index) / scale;
 }

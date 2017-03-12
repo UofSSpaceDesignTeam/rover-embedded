@@ -99,7 +99,7 @@ public:
  * You can define a class to contain and parse the values
  * of the VESC Message you are using.
  * These classes should only be used for packing and unpacking
- * bytes, everythin else should be done in another function or class.
+ * bytes, everything else should be done in another function or class.
  */
 class BlinkMessage : public VESCMessage{
 public:

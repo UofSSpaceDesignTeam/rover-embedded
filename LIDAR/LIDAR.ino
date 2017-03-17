@@ -90,16 +90,18 @@ void serialPrintRange(int pos, int distance)
 
 void loop()
 {
-  for(pos = 35; pos <= 145; pos += 1)
+  for(pos = 0; pos <= 180; pos += 1)
   {
-    myservo.write(pos);
+    int map_pos = map(pos, 0, 180, 35, 145);
+    myservo.write(map_pos);
     distance = lidarGetRange();
     serialPrintRange(pos, distance);
     delay(20);
   }
-  for(pos = 145; pos>=35; pos-=1)
+  for(pos = 180; pos>=0; pos-=1)
   {
-    myservo.write(pos);
+    int map_pos = map(pos, 0, 180, 35, 145);
+    myservo.write(map_pos);
     distance = lidarGetRange();
     serialPrintRange(pos, distance);
     delay(20);

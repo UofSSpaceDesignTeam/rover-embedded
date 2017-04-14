@@ -21,7 +21,7 @@ void setup()
  *  Line 29 is a quartic function.
  *  Line 30 is a cubic function.
  *  Test any one of these functions, one at a time, to see which function best works with agreed weight sensor setup.
- *  Submit a new issue if these functons do not work. We may have to do some retesing if these functions do not work.
+ *  Submit a new issue if these functions do not work. We may have to do some more tesing if these functions do not work.
  */
 double mass(long int analogInput)
 {

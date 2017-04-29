@@ -17,11 +17,11 @@ void setup()
  *  -> A double representing the mass of an object.
  *  
  *  There are 3 possible functions that can be used, and they all grow at different rates.
- *  Line 29 is a quadratic function.
- *  Line 30 is a quartic function.
- *  Line 31 is a cubic function.
+ *  Line 28 is a quadratic function.
+ *  Line 29 is a quartic function.
+ *  Line 30 is a cubic function.
  *  Test any one of these functions, one at a time, to see which function best works with agreed weight sensor setup.
- *  Refer to Waseem if these functons do not work. We may have to do some retesing if these functions do not work.
+ *  Submit a new issue if these functions do not work. We may have to do some more tesing if these functions do not work.
  */
 double mass(long int analogInput)
 {

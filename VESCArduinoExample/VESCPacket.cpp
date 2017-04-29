@@ -17,7 +17,7 @@ void init_msg_callbacks(void) {
     msg_callbacks[i] = NULL;
   }
   msg_callbacks[REQ_SUBSCRIPTION] = sendSubscriptions;
-  msg_names[BLINK_LED] = "bink";
+  msg_names[BLINK_LED] = "blink";
 }
 
 void subscribe(int msg_id, void (*callback)(byte *payload)) {

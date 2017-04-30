@@ -31,6 +31,7 @@ extern char *msg_names[NR_MSGS];
  */
 typedef enum {
   REQ_SUBSCRIPTION = 36,
+  EXAMPLE_SEND = 39,
   BLINK_LED = 40
 } message_t;
 
@@ -92,6 +93,14 @@ public:
     int id = 36;
     char *subscription;
     SubscribeMessage(char *sub);
+    byte *encode();
+};
+
+class ExampleSendMessage : public VESCMessage {
+public:
+    int id = 39;
+    char *str;
+    ExampleSendMessage(char *str);
     byte *encode();
 };
 

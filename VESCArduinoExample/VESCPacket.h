@@ -99,7 +99,7 @@ public:
 class ExampleSendMessage : public VESCMessage {
 public:
     int id = 39;
-    char *str;
+    char str[256];
     ExampleSendMessage(char *str);
     byte *encode();
 };

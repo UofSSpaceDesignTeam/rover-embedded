@@ -3,11 +3,11 @@
 
 void blink_led(byte* payload) {
   BlinkMessage msg = BlinkMessage(payload);
-  if(msg.value == 1){ // arduino is little endian, network is big :(
-    digitalWrite(13,HIGH);
-  } else if(msg.value == 0){
-    digitalWrite(13, LOW);
-  }
+  /* if(msg.value == 1){ // arduino is little endian, network is big :( */
+  /*   digitalWrite(13,HIGH); */
+  /* } else if(msg.value == 0){ */
+  /*   digitalWrite(13, LOW); */
+  /* } */
 }
 
 void setup() {
@@ -17,9 +17,16 @@ void setup() {
   init_msg_callbacks();
   subscribe(BLINK_LED, blink_led);
   Serial.begin(115200);
-  while(!Serial);
+  /* while(!Serial); */
+  delay(5000);
 }
 
 void loop() {
+    digitalWrite(13, HIGH);
+    ExampleSendMessage msg = ExampleSendMessage("test");
+    Serial.println("test");
+    /* SendVESCPacket(&msg); */
+    digitalWrite(13, LOW);
+    delay(1000);
 
 }

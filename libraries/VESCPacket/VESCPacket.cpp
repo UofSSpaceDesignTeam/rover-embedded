@@ -17,7 +17,9 @@ void init_msg_callbacks(void) {
     msg_callbacks[i] = NULL;
   }
   msg_callbacks[REQ_SUBSCRIPTION] = sendSubscriptions;
-  msg_names[BLINK_LED] = "bink";
+  /* Add new message strings/keys here */
+  msg_names[EXAMPLE_SEND] = "examplesend";
+  msg_names[BLINK_LED] = "blink";
 }
 
 void subscribe(int msg_id, void (*callback)(byte *payload)) {
@@ -198,6 +200,19 @@ byte *SubscribeMessage::encode() {
 SubscribeMessage::SubscribeMessage(char *sub) {
   strcpy(this->subscription, sub);
   length = strlen(sub);
+}
+
+
+byte *ExampleSendMessage::encode() {
+    byte *payload = (byte *)malloc(length + 1);
+    payload[0] = id;
+    memcpy(payload+1, str, length);
+    return payload;
+}
+
+ExampleSendMessage::ExampleSendMessage(char *str) {
+    strcpy(this->str, str);
+    length = strlen(str);
 }
 
 /*

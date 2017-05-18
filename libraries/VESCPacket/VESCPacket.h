@@ -31,6 +31,7 @@ extern char *msg_names[NR_MSGS];
  */
 typedef enum {
   REQ_SUBSCRIPTION = 36,
+  EXAMPLE_SEND = 39,
   BLINK_LED = 40
 } message_t;
 
@@ -95,11 +96,19 @@ public:
     byte *encode();
 };
 
+class ExampleSendMessage : public VESCMessage {
+public:
+    int id = 39;
+    char str[256];
+    ExampleSendMessage(char *str);
+    byte *encode();
+};
+
 /*
  * You can define a class to contain and parse the values
  * of the VESC Message you are using.
  * These classes should only be used for packing and unpacking
- * bytes, everything else should be done in another function or class.
+ * bytes, everythin else should be done in another function or class.
  */
 class BlinkMessage : public VESCMessage{
 public:

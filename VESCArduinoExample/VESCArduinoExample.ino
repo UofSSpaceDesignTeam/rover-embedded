@@ -22,11 +22,9 @@ void setup() {
 }
 
 void loop() {
-    digitalWrite(13, HIGH);
     ExampleSendMessage msg = ExampleSendMessage("test");
-    Serial.println("test");
-    /* SendVESCPacket(&msg); */
-    digitalWrite(13, LOW);
+    /* Serial.println("test"); */
+    SendVESCPacket(&msg);
     delay(1000);
 
 }

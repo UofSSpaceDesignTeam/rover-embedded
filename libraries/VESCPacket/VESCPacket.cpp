@@ -20,6 +20,7 @@ void init_msg_callbacks(void) {
   /* Add new message strings/keys here */
   msg_names[EXAMPLE_SEND] = "examplesend";
   msg_names[BLINK_LED] = "blink";
+  msg_names[LIDAR_DATA] = "lidar_data";
 }
 
 void subscribe(int msg_id, void (*callback)(byte *payload)) {
@@ -73,7 +74,7 @@ int SendVESCPacket(VESCMessage *msg){
   uint16_t crcPayload;
 
   int lenPay = msg->length + 1; // ID + message
-  uint8_t *payload = msg->encode();;
+  uint8_t *payload = msg->encode();
   int packet_idx = 0; 
   uint8_t packet[lenPay+7]; // header(2 | 3) + 1-2 byte length + 2 byte crc + footer(3) + "\0"
 
@@ -214,6 +215,22 @@ ExampleSendMessage::ExampleSendMessage(char *str) {
     strcpy(this->str, str);
     length = strlen(str);
 }
+
+LidarDataMessage::LidarDataMessage(int dist, int ang) {
+  distance = dist;
+  angle = ang;
+  length = 2*sizeof(int);
+}
+
+byte *LidarDataMessage::encode() {
+    byte *payload = (byte *)malloc(length + 1);
+    payload[0] = id;
+    int32_t index = 1;
+    buffer_append_int32(payload, distance, &index);
+    buffer_append_int32(payload, angle, &index);
+    return payload;
+}
+
 
 /*
  * Define your message constructor to parse the

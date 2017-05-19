@@ -24,6 +24,7 @@
 /**********************************************************************************************************/
 
 #include <Wire.h>
+#include "VESCPacket.h"
 
 #define    LIDARLite_ADDRESS   0x62          // Default I2C Address of LIDAR-Lite.
 #define    RegisterMeasure     0x00          // Register to write to initiate ranging.
@@ -40,7 +41,7 @@ int distance = 0;    // Distance measured
 void setup()
 {
   // Serial output
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("< START >");
   
   // Servo control
@@ -48,6 +49,7 @@ void setup()
   
   // LIDAR control
   Wire.begin(); // join i2c bus
+  init_msg_callbacks();
 }
 
 // Get a measurement from the LIDAR Lite
@@ -95,7 +97,8 @@ void loop()
     int map_pos = map(pos, 0, 180, 35, 145);
     myservo.write(map_pos);
     distance = lidarGetRange();
-    serialPrintRange(pos, distance);
+    LidarDataMessage msg = LidarDataMessage(distance, pos);
+    SendVESCPacket(&msg);
     delay(20);
   }
   for(pos = 180; pos>=0; pos-=1)
@@ -104,6 +107,10 @@ void loop()
     myservo.write(map_pos);
     distance = lidarGetRange();
     serialPrintRange(pos, distance);
+    LidarDataMessage msg = LidarDataMessage(distance, pos);
+    LidarDataMessage msg2;
+
+    SendVESCPacket(&msg);
     delay(20);
   }
 }

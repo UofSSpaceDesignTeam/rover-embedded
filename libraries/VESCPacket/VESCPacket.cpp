@@ -20,6 +20,7 @@ void init_msg_callbacks(void) {
   /* Add new message strings/keys here */
   msg_names[EXAMPLE_SEND] = "examplesend";
   msg_names[BLINK_LED] = "blink";
+  msg_names[LIDAR_DATA] = "lidar_data";
 }
 
 void subscribe(int msg_id, void (*callback)(byte *payload)) {
@@ -71,11 +72,13 @@ unsigned short crc16(unsigned char *buf, unsigned int len) {
 
 int SendVESCPacket(VESCMessage *msg){
   uint16_t crcPayload;
+  int lenPacket;
 
   int lenPay = msg->length + 1; // ID + message
-  uint8_t *payload = msg->encode();;
+  uint8_t *payload = msg->encode();
   int packet_idx = 0; 
-  uint8_t packet[lenPay+7]; // header(2 | 3) + 1-2 byte length + 2 byte crc + footer(3) + "\0"
+  uint8_t packet[lenPay+6]; // header(2 | 3) + 1-2 byte length + 2 byte crc + footer(3) + "\0"
+
 
   // create payload first
   crcPayload = crc16(payload, lenPay);
@@ -83,24 +86,27 @@ int SendVESCPacket(VESCMessage *msg){
   //Create packet from payload
   if (lenPay <= 256)
   {
+    lenPacket = lenPay+5;
     packet[packet_idx++] = 2;
     packet[packet_idx++] = lenPay;
   }
   else
   {
+    lenPacket = lenPay+6;
     packet[packet_idx++] = 3;
     packet[packet_idx++] = (uint8_t)(lenPay >> 8);
     packet[packet_idx++] = (uint8_t)(lenPay & 0xFF);
   }
   memcpy(&packet[packet_idx], payload, lenPay);
+
   packet_idx += lenPay;
   packet[packet_idx++] = (uint8_t)(crcPayload >> 8);
   packet[packet_idx++] = (uint8_t)(crcPayload & 0xFF);
   packet[packet_idx++] = 3;
-  packet[packet_idx] = '\0'; // we will treat the packet as a string on the next line
-
   //Sending package
-  Serial.print((char*)packet);
+  for(int i=0; i<lenPacket; i++) {
+    Serial.print((char)packet[i]);
+  }
   Serial.print("\n");
   free(payload); // this was allocated in msg.encode()
 
@@ -214,6 +220,23 @@ ExampleSendMessage::ExampleSendMessage(char *str) {
     strcpy(this->str, str);
     length = strlen(str);
 }
+
+LidarDataMessage::LidarDataMessage(int dist, int ang) {
+  distance = dist;
+  angle = ang;
+  length = 8;
+}
+
+byte *LidarDataMessage::encode() {
+    byte *payload = (byte *)malloc(length + 1);
+    int32_t index = 1;
+    payload[0] = id;
+
+    buffer_append_int32(payload, distance, &index);
+    buffer_append_int32(payload, angle, &index);
+    return payload;
+}
+
 
 /*
  * Define your message constructor to parse the

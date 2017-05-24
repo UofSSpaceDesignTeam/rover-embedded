@@ -21,7 +21,7 @@ void buffer_append_bool(uint8_t *buffer,bool value, int32_t *index);
 
 /* Our functions begin: */
 
-#define NR_MSGS 40
+#define NR_MSGS 43
 
 extern void (*msg_callbacks[NR_MSGS + 1])(byte *payload);
 extern char *msg_names[NR_MSGS];
@@ -32,7 +32,8 @@ extern char *msg_names[NR_MSGS];
 typedef enum {
   REQ_SUBSCRIPTION = 36,
   EXAMPLE_SEND = 39,
-  BLINK_LED = 40
+  BLINK_LED = 40,
+  LIDAR_DATA = 41
 } message_t;
 
 
@@ -41,7 +42,7 @@ public:
     int id;
     int length;
     VESCMessage(){
-        id = 0;
+        //id = 0;
         length = 0;
     }
     virtual byte *encode() =0;
@@ -116,6 +117,16 @@ public:
     int value; // should just be 0 or 1
     BlinkMessage(byte *payload);
     byte *encode() {return NULL;}
+};
+
+
+class LidarDataMessage : public VESCMessage {
+public:
+  int id = 41;
+  int32_t distance;
+  int32_t angle;
+  LidarDataMessage(int dist, int ang);
+  byte *encode();
 };
 
 

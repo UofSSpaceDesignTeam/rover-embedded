@@ -42,7 +42,7 @@ public:
     int id;
     int length;
     VESCMessage(){
-        id = 0;
+        //id = 0;
         length = 0;
     }
     virtual byte *encode() =0;
@@ -122,9 +122,9 @@ public:
 
 class LidarDataMessage : public VESCMessage {
 public:
-  int id = LIDAR_DATA;
-  int distance;
-  int angle;
+  int id = 41;
+  int32_t distance;
+  int32_t angle;
   LidarDataMessage(int dist, int ang);
   byte *encode();
 };

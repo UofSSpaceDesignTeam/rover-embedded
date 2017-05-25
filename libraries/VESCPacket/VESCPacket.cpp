@@ -72,11 +72,13 @@ unsigned short crc16(unsigned char *buf, unsigned int len) {
 
 int SendVESCPacket(VESCMessage *msg){
   uint16_t crcPayload;
+  int lenPacket;
 
   int lenPay = msg->length + 1; // ID + message
   uint8_t *payload = msg->encode();
   int packet_idx = 0; 
-  uint8_t packet[lenPay+7]; // header(2 | 3) + 1-2 byte length + 2 byte crc + footer(3) + "\0"
+  uint8_t packet[lenPay+6]; // header(2 | 3) + 1-2 byte length + 2 byte crc + footer(3) + "\0"
+
 
   // create payload first
   crcPayload = crc16(payload, lenPay);
@@ -84,24 +86,27 @@ int SendVESCPacket(VESCMessage *msg){
   //Create packet from payload
   if (lenPay <= 256)
   {
+    lenPacket = lenPay+5;
     packet[packet_idx++] = 2;
     packet[packet_idx++] = lenPay;
   }
   else
   {
+    lenPacket = lenPay+6;
     packet[packet_idx++] = 3;
     packet[packet_idx++] = (uint8_t)(lenPay >> 8);
     packet[packet_idx++] = (uint8_t)(lenPay & 0xFF);
   }
   memcpy(&packet[packet_idx], payload, lenPay);
+
   packet_idx += lenPay;
   packet[packet_idx++] = (uint8_t)(crcPayload >> 8);
   packet[packet_idx++] = (uint8_t)(crcPayload & 0xFF);
   packet[packet_idx++] = 3;
-  packet[packet_idx] = '\0'; // we will treat the packet as a string on the next line
-
   //Sending package
-  Serial.print((char*)packet);
+  for(int i=0; i<lenPacket; i++) {
+    Serial.print((char)packet[i]);
+  }
   Serial.print("\n");
   free(payload); // this was allocated in msg.encode()
 

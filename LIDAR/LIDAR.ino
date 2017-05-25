@@ -38,18 +38,23 @@ Servo myservo;
 int pos = 0;         // Position of the servo (degress, [0, 180])
 int distance = 0;    // Distance measured
 
+void blink_led(byte* payload) {
+
+}
+
 void setup()
 {
+    init_msg_callbacks();
+  subscribe(BLINK_LED, blink_led);
   // Serial output
   Serial.begin(115200);
-  Serial.println("< START >");
   
   // Servo control
   myservo.attach(5);
   
   // LIDAR control
   Wire.begin(); // join i2c bus
-  init_msg_callbacks();
+  delay(5000);
 }
 
 // Get a measurement from the LIDAR Lite
@@ -96,21 +101,18 @@ void loop()
   {
     int map_pos = map(pos, 0, 180, 35, 145);
     myservo.write(map_pos);
-    distance = lidarGetRange();
+    //distance = lidarGetRange();
     LidarDataMessage msg = LidarDataMessage(distance, pos);
     SendVESCPacket(&msg);
-    delay(20);
+    delay(500);
   }
   for(pos = 180; pos>=0; pos-=1)
   {
     int map_pos = map(pos, 0, 180, 35, 145);
     myservo.write(map_pos);
-    distance = lidarGetRange();
-    serialPrintRange(pos, distance);
+    //distance = lidarGetRange();
     LidarDataMessage msg = LidarDataMessage(distance, pos);
-    LidarDataMessage msg2;
-
     SendVESCPacket(&msg);
-    delay(20);
+    delay(500);
   }
 }

@@ -284,6 +284,5 @@ if (system && gyro && mag >= 1) {
   CompassDataMessage msg = CompassDataMessage(heading1, pitch1, roll1);
   SendVESCPacket(&msg);
 }
-
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }

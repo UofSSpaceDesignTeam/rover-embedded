@@ -260,6 +260,9 @@ void setup(void)
 void loop(void)
 {
   imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+      
+      uint8_t system, gyro, accel, mag;
+      bno.getCalibration(&system, &gyro, &accel, &mag);
 /*
   /* Display calibration status for each sensor. * /
   uint8_t system, gyro, accel, mag = 0;
@@ -275,13 +278,13 @@ void loop(void)
             Serial.println();
   }
 */  
-  // Check Validity of Data, based on current calibration
-if (system && gyro && mag >= 1) {
-  float heading1;
-  float pitch1;
-  float roll1;
-  heading1 = euler.x();
-  CompassDataMessage msg = CompassDataMessage(heading1, pitch1, roll1);
+  // Checks Validity of Data, based on current calibration. If sufficient, encodes & sends CompassDataMessage
+if ((system >= 1) && (gyro >= 1) && (mag >= 1)) {
+  float heading;
+  float pitch;
+  float roll;
+  heading = euler.x();
+  CompassDataMessage msg = CompassDataMessage(heading, pitch, roll);
   SendVESCPacket(&msg);
 }
   delay(BNO055_SAMPLERATE_DELAY_MS);

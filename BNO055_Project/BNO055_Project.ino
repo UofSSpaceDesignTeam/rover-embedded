@@ -6,7 +6,7 @@
 #include <EEPROM.h>
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (100)
+#define BNO055_SAMPLERATE_DELAY_MS (300)
 
 Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS_B);
 
@@ -233,17 +233,27 @@ void RestoreCalib(void){
     delay(500);     */
 }
 
+void blink_led(byte* payload) {
+    BlinkMessage msg = BlinkMessage(payload);
+  if(msg.value == 1){ // arduino is little endian, network is big :(
+    digitalWrite(13,HIGH);
+  } else if(msg.value == 0){
+    digitalWrite(13, LOW);
+  }
+}
 
 void setup(void)
 {
-  Serial.begin(9600);
-  Serial.println("Orientation Sensor Raw Data Test"); Serial.println("");
+  init_msg_callbacks();
+  subscribe(BLINK_LED, blink_led);
+  Serial.begin(115200);
+  //Serial.println("Orientation Sensor Raw Data Test"); Serial.println("");
 
   /* Initialise the sensor */
   if(!bno.begin())
   {
     /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    //Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
     while(1);
   }
 
@@ -254,7 +264,7 @@ void setup(void)
   // Restore Calibration offsets (mainly for accel) from EEPROM storage ((can also store new offsets))
   RestoreCalib();
 
-  Serial.println("Calibration status values: 0=uncalibrated, 3=fully calibrated");
+  //Serial.println("Calibration status values: 0=uncalibrated, 3=fully calibrated");
 }
 
 void loop(void)

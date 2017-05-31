@@ -258,9 +258,9 @@ byte *CompassDataMessage::encode() {
     byte *payload = (byte *)malloc(length + 1);
     payload[0] = COMPASS_DATA;
     int32_t index = 1;
-    buffer_append_float32(payload, heading3, 1, &index);
-    buffer_append_float32(payload, pitch3, 1, &index);
-    buffer_append_float32(payload, roll3, 1, &index);
+    buffer_append_float32(payload, heading3, 1000, &index);
+    buffer_append_float32(payload, pitch3, 1000, &index);
+    buffer_append_float32(payload, roll3, 1000, &index);
   return payload;
 }
 

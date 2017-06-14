@@ -18,8 +18,13 @@ void setup() {
   subscribe(BLINK_LED, blink_led);
   Serial.begin(115200);
   while(!Serial);
+  //delay(5000);
 }
 
 void loop() {
+    ExampleSendMessage msg = ExampleSendMessage("test");
+    /* Serial.println("test"); */
+    SendVESCPacket(&msg);
+    delay(1000);
 
 }

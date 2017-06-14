@@ -29,6 +29,7 @@
 
 #include <Wire.h>
 #include "A4988.h"
+#include "VESCPacket.h"
 
 #define    LIDARLite_ADDRESS   0x62          // Default I2C Address of LIDAR-Lite.
 #define    RegisterMeasure     0x00          // Register to write to initiate ranging.
@@ -56,12 +57,16 @@ int second = 0;
 int count = 0;
 
 unsigned long time;
+void blink_led(byte* payload) {
+
+}
 
 void setup()
 {
+    init_msg_callbacks();
+  subscribe(BLINK_LED, blink_led);
   // Serial output
-  Serial.begin(9600);
-  Serial.println("< START >");
+  Serial.begin(115200);
   
   // Servo control
   myservo.attach(5);
@@ -143,7 +148,9 @@ void loop()
 {
   for(int i = 0; i < 200; i++){
     distance = lidarGetRange();
-    serialPrintRange(pos, distance);
+    //serialPrintRange(pos, distance);
+    LidarDataMessage msg = LidarDataMessage(distance, pos);
+    SendVESCPacket(&msg);
     stepper.move(1);
     pos = pos + 1.8; 
     }

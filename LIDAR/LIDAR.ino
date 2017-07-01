@@ -36,8 +36,8 @@
 #define    RegisterHighLowB    0x8f          // Register to get both High and Low bytes in 1 call.
 
 #define MOTOR_STEPS 600 // 3:1 belt ratio
-#define DIR 8
-#define STEP 9
+#define DIR 14
+#define STEP 15
 #define MOTOR_DELAY 1 // 1/2 period of pulse to the stepper
 
 
@@ -46,7 +46,7 @@ Servo LidarPitch;
 double pos = 0;         // Position of the servo (degress, [0, 180])
 int distance = 0;    // Distance measured
 int lidar_pitch = 45;
-int pitch_step = 3;
+int pitch_step = 1;
 #define PITCH_UPPER 50 // Don't go higher than 60, mount might break
 #define PITCH_LOWER 35
 
@@ -174,10 +174,10 @@ void loop()
   for(int i = 0; i < MOTOR_STEPS; i++){
     distance = lidarGetRange();
     char buff[256];
-    /* sprintf(buff, "distance: %f\t angle: %f, pitch: %f", distance/100.0, pos, lidar_pitch-45); */
-    /* Serial.println(buff); */
-    LidarDataMessage msg = LidarDataMessage(distance, pos);
-    SendVESCPacket(&msg);
+    sprintf(buff, "distance: %f\t angle: %f, pitch: %f", distance/100.0, pos, lidar_pitch-45);
+    Serial.println(buff);
+    /* LidarDataMessage msg = LidarDataMessage(distance, pos); */
+    /* SendVESCPacket(&msg); */
     pos = pos + 0.6;
     step_motor();
   }

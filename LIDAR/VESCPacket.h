@@ -34,7 +34,8 @@ typedef enum {
   EXAMPLE_SEND = 39,
   BLINK_LED = 40,
   LIDAR_DATA = 41,
-  COMPASS_DATA = 42
+  COMPASS_DATA = 42,
+  BATT_READ = 43
 } message_t;
 
 
@@ -125,8 +126,9 @@ class LidarDataMessage : public VESCMessage {
 public:
   int id = LIDAR_DATA;
   int32_t distance;
-  int32_t angle;
-  LidarDataMessage(int dist, int ang);
+  float angle;
+  int32_t tilt;
+  LidarDataMessage(int dist, float ang, int tilt);
   byte *encode();
 };
 
@@ -138,6 +140,15 @@ public:
   float roll3;
   CompassDataMessage(float heading2, float pitch2, float roll2);
   byte *encode();
+};
+
+class BatteryVoltageRead : public VESCMessage {
+public:
+	int id = BATT_READ;
+	float V_1, V_2, V_3, V_4, V_5, V_6, V_7, V_8;
+	BatteryVoltageRead(float V1, float V2, float V3, float V4, float V5, float V6, float V7, float V8);
+	byte *encode();
+
 };
 
 

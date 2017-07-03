@@ -38,7 +38,7 @@
 #define MOTOR_STEPS 600 // 3:1 belt ratio
 #define DIR 14
 #define STEP 15
-#define MOTOR_DELAY 1 // 1/2 period of pulse to the stepper
+#define MOTOR_DELAY 2 // 1/2 period of pulse to the stepper
 
 
 Servo LidarPitch;
@@ -75,6 +75,7 @@ void setup()
   // LIDAR control
   Wire.begin(); // join i2c bus
   //setAcquisition(200);
+  delay(5000);
 }
 void setAcquisition(int val){
   Wire.beginTransmission((int)LIDARLite_ADDRESS); // transmit to LIDAR-Lite
@@ -172,12 +173,12 @@ void loop()
 {
   update_pitch();
   for(int i = 0; i < MOTOR_STEPS; i++){
-    distance = lidarGetRange();
+    /* distance = lidarGetRange(); */
     char buff[256];
-    sprintf(buff, "distance: %f\t angle: %f, pitch: %f", distance/100.0, pos, lidar_pitch-45);
-    Serial.println(buff);
-    /* LidarDataMessage msg = LidarDataMessage(distance, pos); */
-    /* SendVESCPacket(&msg); */
+    /* sprintf(buff, "distance: %f\t angle: %f, pitch: %d", distance/100.0, pos, lidar_pitch-45); */
+    /* Serial.println(buff); */
+    LidarDataMessage msg = LidarDataMessage(distance, pos, lidar_pitch-45);
+    SendVESCPacket(&msg);
     pos = pos + 0.6;
     step_motor();
   }

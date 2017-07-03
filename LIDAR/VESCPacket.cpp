@@ -208,6 +208,17 @@ SubscribeMessage::SubscribeMessage(char *sub) {
   length = strlen(sub);
 }
 
+/*
+ * Define your message constructor to parse the
+ * payload byte array to populate the appropriate
+ * values in the class
+ */
+BlinkMessage::BlinkMessage(byte *payload){
+        int32_t index = 1;
+        value = buffer_get_int32(payload, &index);
+        length = sizeof(int);
+}
+
 
 byte *ExampleSendMessage::encode() {
     byte *payload = (byte *)malloc(length + 1);
@@ -224,29 +235,33 @@ ExampleSendMessage::ExampleSendMessage(char *str) {
 LidarDataMessage::LidarDataMessage(int dist, int ang) {
   distance = dist;
   angle = ang;
-  length = 8;
+  length = 2*sizeof(int);
 }
 
 byte *LidarDataMessage::encode() {
     byte *payload = (byte *)malloc(length + 1);
-    int32_t index = 1;
     payload[0] = id;
-
+    int32_t index = 1;
     buffer_append_int32(payload, distance, &index);
     buffer_append_int32(payload, angle, &index);
     return payload;
 }
 
+CompassDataMessage::CompassDataMessage(float heading2, float pitch2, float roll2) {
+  heading3 = heading2;
+  pitch3 = pitch2;
+  roll3 = roll2;
+  length = 3*sizeof(float);
+}
 
-/*
- * Define your message constructor to parse the
- * payload byte array to populate the appropriate
- * values in the class
- */
-BlinkMessage::BlinkMessage(byte *payload){
-        int32_t index = 1;
-        value = buffer_get_int32(payload, &index);
-        length = sizeof(int);
+byte *CompassDataMessage::encode() {
+    byte *payload = (byte *)malloc(length + 1);
+    payload[0] = COMPASS_DATA;
+    int32_t index = 1;
+    buffer_append_float32(payload, heading3, 1000, &index);
+    buffer_append_float32(payload, pitch3, 1000, &index);
+    buffer_append_float32(payload, roll3, 1000, &index);
+  return payload;
 }
 
 

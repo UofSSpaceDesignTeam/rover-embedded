@@ -33,7 +33,8 @@ typedef enum {
   REQ_SUBSCRIPTION = 36,
   EXAMPLE_SEND = 39,
   BLINK_LED = 40,
-  LIDAR_DATA = 41
+  LIDAR_DATA = 41,
+  COMPASS_DATA = 42
 } message_t;
 
 
@@ -122,13 +123,22 @@ public:
 
 class LidarDataMessage : public VESCMessage {
 public:
-  int id = 41;
+  int id = LIDAR_DATA;
   int32_t distance;
   int32_t angle;
   LidarDataMessage(int dist, int ang);
   byte *encode();
 };
 
+class CompassDataMessage : public VESCMessage {
+public:
+  int id = COMPASS_DATA;
+  float heading3;
+  float pitch3;
+  float roll3;
+  CompassDataMessage(float heading2, float pitch2, float roll2);
+  byte *encode();
+};
 
 
 

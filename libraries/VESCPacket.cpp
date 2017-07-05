@@ -5,7 +5,6 @@
 void (*msg_callbacks[NR_MSGS+1])(byte *payload);
 char *msg_names[NR_MSGS];
 char *g_subscriptions;
-
 void sendSubscriptions(byte *payload) {
   SubscribeMessage sub = SubscribeMessage(g_subscriptions);
   Serial1.println(sub.subscription); // Hacks; won't work with out this for some reason...
@@ -21,6 +20,7 @@ void init_msg_callbacks(void) {
   msg_names[EXAMPLE_SEND] = "examplesend";
   msg_names[BLINK_LED] = "blink";
   msg_names[LIDAR_DATA] = "lidar_data";
+  msg_names[ACCELEROMETER_DATA] = "accelerometer_data";
 }
 
 void subscribe(int msg_id, void (*callback)(byte *payload)) {
@@ -264,6 +264,22 @@ byte *CompassDataMessage::encode() {
   return payload;
 }
 
+AccelerometerDataMessage::AccelerometerDataMessage(float x, float y, float z) {
+  this->x = x;
+  this->x = y;
+  this->x = z;
+  this->length = 3*sizeof(float);
+}
+
+byte *AccelerometerDataMessage::encode() {
+  byte *payload = (byte*) malloc(length+1);
+  payload[0] = ACCELEROMETER_DATA;
+  int32_t index = 1;
+  buffer_append_float32(payload, this->x, 1000, &index);
+  buffer_append_float32(payload, this->y, 1000, &index);
+  buffer_append_float32(payload, this->z, 1000, &index);
+  return payload;
+}
 
 /*
  * The following are taken from Benjamin Vedder's bldc firmware:

@@ -21,7 +21,7 @@ void buffer_append_bool(uint8_t *buffer,bool value, int32_t *index);
 
 /* Our functions begin: */
 
-#define NR_MSGS 43
+#define NR_MSGS 44
 
 extern void (*msg_callbacks[NR_MSGS + 1])(byte *payload);
 extern char *msg_names[NR_MSGS];
@@ -34,8 +34,9 @@ typedef enum {
   EXAMPLE_SEND = 39,
   BLINK_LED = 40,
   LIDAR_DATA = 41,
-  COMPASS_DATA = 42
-  BATT_READ = 43
+  COMPASS_DATA = 42,
+  BATT_READ = 43,
+  ACCELEROMETER_DATA = 44,
 } message_t;
 
 
@@ -143,13 +144,19 @@ public:
 
 class BatteryVoltageRead : public VESCMessage {
 public:
-	int id = 43;
+	int id = BATT_READ;
 	float V_1, V_2, V_3, V_4, V_5, V_6, V_7, V_8;
 	BatteryVoltageRead(float V1, float V2, float V3, float V4, float V5, float V6, float V7, float V8);
 	byte *encode();
 
 };
 
-
+class AccelerometerDataMessage : public VESCMessage {
+public:
+  int id = ACCELEROMETER_DATA;
+  float x, y, z;
+  AccelerometerDataMessage(float x, float y, float z);
+  byte *encode();
+};
 
 #endif

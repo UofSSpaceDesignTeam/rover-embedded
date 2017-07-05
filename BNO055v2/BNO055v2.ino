@@ -33,7 +33,7 @@ void println(char* str) {}
 #endif
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (300)
+#define BNO055_SAMPLERATE_DELAY_MS (250)
 
 Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS_A);
 
@@ -82,11 +82,6 @@ void setup(void)
 {
   Serial.begin(115200);
 
-  //init_msg_callbacks();
-  //subscribe(BLINK_LED, blink_led);
-
-  //Serial.println("Orientation Sensor Raw Data Test"); Serial.println("");
-
   /* Initialise the sensor */
   print("Waiting for BNO055");
   while(!bno.begin()) {
@@ -98,6 +93,10 @@ void setup(void)
   bno.setSensorOffsets(bno_calibration);
 
   print("\nInitialized!\n");
+
+  delay(1000);
+  init_msg_callbacks();
+  subscribe(BLINK_LED, blink_led);
 }
 
 

@@ -266,8 +266,8 @@ byte *CompassDataMessage::encode() {
 
 AccelerometerDataMessage::AccelerometerDataMessage(float x, float y, float z) {
   this->x = x;
-  this->x = y;
-  this->x = z;
+  this->y = y;
+  this->z = z;
   this->length = 3*sizeof(float);
 }
 

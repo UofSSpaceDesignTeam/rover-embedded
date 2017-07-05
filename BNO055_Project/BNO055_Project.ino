@@ -22,7 +22,7 @@ void println(char* str) {}
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (300)
 
-Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS_B);
+Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS_A);
 
 
 /**************************************************************************/
@@ -273,7 +273,7 @@ void setup(void)
 
   delay(1000);
 
-  bno.setExtCrystalUse(true);
+  bno.setExtCrystalUse(false);
 
   // Restore Calibration offsets (mainly for accel) from EEPROM storage ((can also store new offsets))
   RestoreCalib();

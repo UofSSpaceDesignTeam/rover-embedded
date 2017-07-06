@@ -80,6 +80,8 @@ void blink_led(byte* payload) {
 
 void setup(void)
 {
+  init_msg_callbacks();
+
   Serial.begin(115200);
 
   /* Initialise the sensor */
@@ -95,7 +97,7 @@ void setup(void)
   print("\nInitialized!\n");
 
   delay(1000);
-  init_msg_callbacks();
+
   subscribe(BLINK_LED, blink_led);
 }
 

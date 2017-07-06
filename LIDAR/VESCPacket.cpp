@@ -232,10 +232,10 @@ ExampleSendMessage::ExampleSendMessage(char *str) {
     length = strlen(str);
 }
 
-LidarDataMessage::LidarDataMessage(int dist, float ang, int tilt) {
+LidarDataMessage::LidarDataMessage(int dist, float ang, int tilt_) {
   distance = dist;
   angle = ang;
-  tilt = tilt;
+  tilt = tilt_;
   length = 2*sizeof(int) + sizeof(float);
 }
 

@@ -26,7 +26,7 @@
 /**********************************************************************************************************/
 
 #include <Wire.h>
-#include "A4988.h" // Stepper motor library: https://github.com/laurb9/StepperDriver
+//#include "A4988.h" // Stepper motor library: https://github.com/laurb9/StepperDriver
 #include "VESCPacket.h"
 #include <Servo.h>
 

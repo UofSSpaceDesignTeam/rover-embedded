@@ -264,20 +264,20 @@ byte *CompassDataMessage::encode() {
   return payload;
 }
 
-AccelerometerDataMessage::AccelerometerDataMessage(float x, float y, float z) {
-  this->x = x;
-  this->y = y;
-  this->z = z;
-  this->length = 3*sizeof(float);
+AccelerometerDataMessage::AccelerometerDataMessage(float x_, float y_, float z_) {
+  x = x_;
+  y = y_;
+  z = z_;
+  length = 3*sizeof(float);
 }
 
 byte *AccelerometerDataMessage::encode() {
   byte *payload = (byte*) malloc(length+1);
   payload[0] = ACCELEROMETER_DATA;
   int32_t index = 1;
-  buffer_append_float32(payload, this->x, 1000, &index);
-  buffer_append_float32(payload, this->y, 1000, &index);
-  buffer_append_float32(payload, this->z, 1000, &index);
+  buffer_append_float32(payload, x, 1000, &index);
+  buffer_append_float32(payload, y, 1000, &index);
+  buffer_append_float32(payload, z, 1000, &index);
   return payload;
 }
 

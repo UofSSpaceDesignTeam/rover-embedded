@@ -8,6 +8,8 @@
 */
 
 #include <Servo.h>
+#include <string.h>
+#include "VESCPacket.h"
 
 Servo door_lft;
 Servo door_mid;
@@ -28,39 +30,39 @@ void unlock(Servo servo) {
   }
 }
 
+void door_control(byte* payload) {
+  DoorControl msg = DoorControl(payload);
+  if(msg.value == 0) {
+    unlock(door_lft);
+  }
+  else if(msg.value == 1) {
+    unlock(door_mid);
+  }
+  else if(msg.value == 2) {
+    unlock(door_rgt);
+  }
+  else {
+    lock(door_lft);
+    lock(door_mid);
+    lock(door_rgt);
+  }
+}
+
 void setup() {
   door_lft.attach(11);  // attaches the servo on pin 9 to the servo object
   door_mid.attach(10);
   door_rgt.attach(9);
 
-  lock(door_lft);
-  delay(100);
-  lock(door_mid);
-  delay(100);
-  lock(door_rgt);
-  delay(100);
+  init_msg_callbacks();
+  subscribe(DOOR_CONTROL, door_control);
 
+  lock(door_lft);
+  lock(door_mid);
+  lock(door_rgt);
+  
 }
 
 void loop() {
-
-  lock(door_lft);
-  delay(100);
-  lock(door_mid);
-  delay(100);
-  lock(door_rgt);
-  delay(100);
-
   delay(1000);
-
-  unlock(door_lft);
-  delay(100);
-  unlock(door_mid);
-  delay(100);
-  unlock(door_rgt);
-  delay(100);
-
-  delay(1000);
-
 }
 

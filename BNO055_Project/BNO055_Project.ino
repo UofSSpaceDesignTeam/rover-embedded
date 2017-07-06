@@ -1,21 +1,35 @@
 #include <Wire.h>
-#include "Adafruit_Sensor.h"
+#include <Adafruit_Sensor.h>
 #include "Adafruit_BNO055.h"
 #include "utility/imumaths.h"
 #include "VESCPacket.h"
 #include <EEPROM.h>
 
+#define DEV
+
+#ifdef DEV
+void print(char* str) {
+  Serial.print(str);
+}
+void println(char *str) {
+  Serial.println(str);
+}
+#else
+void print(char* str) {}
+void println(char* str) {}
+#endif
+
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (300)
 
-Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS_B);
+Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS_A);
+
 
 /**************************************************************************/
 /*
     Displays some basic information on this sensor from the unified
     sensor API sensor_t type (see Adafruit_Sensor for more information)
-    */
-/**************************************************************************/
+    */ /**************************************************************************/
 void displaySensorDetails(void)
 {
     sensor_t sensor;
@@ -250,16 +264,16 @@ void setup(void)
   //Serial.println("Orientation Sensor Raw Data Test"); Serial.println("");
 
   /* Initialise the sensor */
-  if(!bno.begin())
-  {
-    /* There was a problem detecting the BNO055 ... check your connections */
-    //Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while(1);
+  print("Waiting for BNO055 to initialise");
+  while(!bno.begin()) {
+    delay(100);
+    print(".");
   }
+  print("\nInitialized!\n");
 
   delay(1000);
 
-  bno.setExtCrystalUse(true);
+  bno.setExtCrystalUse(false);
 
   // Restore Calibration offsets (mainly for accel) from EEPROM storage ((can also store new offsets))
   RestoreCalib();
@@ -269,11 +283,14 @@ void setup(void)
 
 void loop(void)
 {
-  imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
-      
-      uint8_t system, gyro, accel, mag;
-      bno.getCalibration(&system, &gyro, &accel, &mag);
-/*
+  println("start of loop!");
+
+  char buff[256];
+
+  uint8_t system, gyro, accel, mag = 0;
+  bno.getCalibration(&system, &gyro, &accel, &mag);
+
+  /*
   /* Display calibration status for each sensor. * /
   uint8_t system, gyro, accel, mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
@@ -287,15 +304,24 @@ void loop(void)
             displayCalStatus();
             Serial.println();
   }
-*/  
+  */
+
   // Checks Validity of Data, based on current calibration. If sufficient, encodes & sends CompassDataMessage
-if ((system >= 1) && (gyro >= 1) && (mag >= 1)) {
-  float heading;
-  float pitch;
-  float roll;
-  heading = euler.x();
-  CompassDataMessage msg = CompassDataMessage(heading, pitch, roll);
-  SendVESCPacket(&msg);
-}
+  if ((system >= 1) && (gyro >= 1) && (mag >= 1)) {
+    imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+
+    float heading = euler.x();
+    float pitch   = euler.y();
+    float roll    = euler.z();
+
+    sprintf(buff, "heading: %f, pitch %f, roll %f\n", heading, pitch, roll);
+    println(buff);
+
+    CompassDataMessage msg = CompassDataMessage(heading, pitch, roll);
+#ifndef DEV
+    SendVESCPacket(&msg);
+#endif
+  }
+
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }

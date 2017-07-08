@@ -128,7 +128,8 @@ public:
   int32_t distance;
   float angle;
   int32_t tilt;
-  LidarDataMessage(int dist, float ang, int tilt);
+  int32_t finished;
+  LidarDataMessage(int dist, float ang, int tilt, int finished);
   byte *encode();
 };
 

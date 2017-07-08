@@ -127,8 +127,10 @@ class LidarDataMessage : public VESCMessage {
 public:
   int id = LIDAR_DATA;
   int32_t distance;
-  int32_t angle;
-  LidarDataMessage(int dist, int ang);
+  float angle;
+  int32_t tilt;
+  int32_t finished;
+  LidarDataMessage(int dist, float ang, int tilt, int finished);
   byte *encode();
 };
 

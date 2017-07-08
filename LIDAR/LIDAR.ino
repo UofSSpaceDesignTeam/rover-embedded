@@ -179,7 +179,7 @@ void loop()
     char buff[256];
     /* sprintf(buff, "distance: %f\t angle: %f, pitch: %d", distance/100.0, pos, lidar_pitch-45); */
     /* Serial.println(buff); */
-    LidarDataMessage msg = LidarDataMessage(distance, pos, lidar_pitch-45);
+    LidarDataMessage msg = LidarDataMessage(distance, pos, lidar_pitch-45, 0);
     SendVESCPacket(&msg);
     if(dir == 0) {
         pos = pos + 0.6;

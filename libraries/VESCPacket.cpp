@@ -232,10 +232,12 @@ ExampleSendMessage::ExampleSendMessage(char *str) {
     length = strlen(str);
 }
 
-LidarDataMessage::LidarDataMessage(int dist, int ang) {
+LidarDataMessage::LidarDataMessage(int dist, float ang, int tilt_, int finished_) {
   distance = dist;
   angle = ang;
-  length = 2*sizeof(int);
+  tilt = tilt_;
+  finished = finished_;
+  length = 3*sizeof(int) + sizeof(float);
 }
 
 byte *LidarDataMessage::encode() {
@@ -243,7 +245,9 @@ byte *LidarDataMessage::encode() {
     payload[0] = id;
     int32_t index = 1;
     buffer_append_int32(payload, distance, &index);
-    buffer_append_int32(payload, angle, &index);
+    buffer_append_float32(payload, angle, 100, &index);
+    buffer_append_int32(payload, tilt, &index);
+    buffer_append_int32(payload, finished, &index);
     return payload;
 }
 

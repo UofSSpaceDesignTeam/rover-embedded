@@ -35,7 +35,7 @@
 #define    MeasureValue        0x04          // Value to initiate ranging.
 #define    RegisterHighLowB    0x8f          // Register to get both High and Low bytes in 1 call.
 
-#define MOTOR_STEPS 600 // 3:1 belt ratio
+#define MOTOR_STEPS 3 // steps per degree
 #define DIR 14
 #define STEP 15
 #define MOTOR_DELAY 2 // 1/2 period of pulse to the stepper
@@ -45,10 +45,13 @@ Servo LidarPitch;
 
 double pos = 0;         // Position of the servo (degress, [0, 180])
 int distance = 0;    // Distance measured
+int dir = 0;
 int lidar_pitch = 45;
 int pitch_step = 1;
 #define PITCH_UPPER 50 // Don't go higher than 60, mount might break
 #define PITCH_LOWER 35
+#define MAX_ANGLE 45
+#define MIN_ANGLE -45
 
 int second = 0;
 int count = 0;
@@ -66,7 +69,6 @@ void setup()
   Serial.begin(115200);
   pinMode(DIR, OUTPUT);
   pinMode(STEP, OUTPUT);
-  digitalWrite(DIR, LOW);
 
   // Servo control
   LidarPitch.attach(5);
@@ -167,20 +169,27 @@ void step_motor() {
     delay(MOTOR_DELAY);
     digitalWrite(STEP, LOW);
     delay(MOTOR_DELAY);
+	digitalWrite(DIR, dir);
 }
 
 void loop()
 {
-  update_pitch();
-  for(int i = 0; i < MOTOR_STEPS; i++){
-    /* distance = lidarGetRange(); */
+  /* update_pitch(); */
+    distance = lidarGetRange();
     char buff[256];
     /* sprintf(buff, "distance: %f\t angle: %f, pitch: %d", distance/100.0, pos, lidar_pitch-45); */
     /* Serial.println(buff); */
     LidarDataMessage msg = LidarDataMessage(distance, pos, lidar_pitch-45);
     SendVESCPacket(&msg);
-    pos = pos + 0.6;
+    if(dir == 0) {
+        pos = pos + 0.6;
+    } else {
+        pos = pos - 0.6;
+    }
     step_motor();
-  }
-  pos = 0;
+    if(pos < MIN_ANGLE && dir == 1) {
+        dir = 0;
+    } else if(pos > MAX_ANGLE && dir == 0) {
+        dir = 1;
+    }
 }

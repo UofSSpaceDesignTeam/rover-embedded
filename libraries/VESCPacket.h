@@ -21,7 +21,7 @@ void buffer_append_bool(uint8_t *buffer,bool value, int32_t *index);
 
 /* Our functions begin: */
 
-#define NR_MSGS 44
+#define NR_MSGS 45
 
 extern void (*msg_callbacks[NR_MSGS + 1])(byte *payload);
 extern char *msg_names[NR_MSGS];
@@ -37,6 +37,7 @@ typedef enum {
   COMPASS_DATA = 42,
   BATT_READ = 43,
   ACCELEROMETER_DATA = 44,
+  START_LIDAR_SCAN = 45,
 } message_t;
 
 
@@ -160,5 +161,14 @@ public:
   AccelerometerDataMessage(float x, float y, float z);
   byte *encode();
 };
+
+class StartLidarScan : public VESCMessage {
+public:
+	int id = START_LIDAR_SCAN;
+	int flag;
+	StartLidarScan(byte *payload);
+	byte *encode();
+
+}
 
 #endif

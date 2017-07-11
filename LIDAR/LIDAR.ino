@@ -57,14 +57,50 @@ int second = 0;
 int count = 0;
 
 unsigned long time;
-void blink_led(byte* payload) {
+void start_scan(byte* payload) {
+  /* update_pitch(); */
+	for(int i=0, i< MAX_ANGLE; i++) {
+		dir = 0;
+		distance = lidarGetRange();
+		char buff[256];
+		/* sprintf(buff, "distance: %f\t angle: %f, pitch: %d", distance/100.0, pos, lidar_pitch-45); */
+		/* Serial.println(buff); */
+		LidarDataMessage msg = LidarDataMessage(distance, pos, lidar_pitch-45, 0);
+		SendVESCPacket(&msg);
+		if(dir == 0) {
+			pos = pos + 0.6;
+		} else {
+			pos = pos - 0.6;
+		}
+		step_motor();
 
+	}
+	for(int i=0; i< MAX_ANGLE; i++) {
+		dir = 1;
+		distance = lidarGetRange();
+		char buff[256];
+		/* sprintf(buff, "distance: %f\t angle: %f, pitch: %d", distance/100.0, pos, lidar_pitch-45); */
+		/* Serial.println(buff); */
+		if(i == MAX_ANGLE) {
+			LidarDataMessage msg = LidarDataMessage(distance, pos, lidar_pitch-45, 1);
+			SendVESCPacket(&msg);
+		} else {
+			LidarDataMessage msg = LidarDataMessage(distance, pos, lidar_pitch-45, 0);
+			SendVESCPacket(&msg);
+		}
+		if(dir == 0) {
+			pos = pos + 0.6;
+		} else {
+			pos = pos - 0.6;
+		}
+		step_motor();
+	}
 }
 
 void setup()
 {
     init_msg_callbacks();
-  subscribe(BLINK_LED, blink_led);
+  subscribe(START_LIDAR_SCAN , start_scan);
   // Serial output
   Serial.begin(115200);
   pinMode(DIR, OUTPUT);

@@ -5,7 +5,6 @@
 void (*msg_callbacks[NR_MSGS+1])(byte *payload);
 char *msg_names[NR_MSGS];
 char *g_subscriptions;
-
 void sendSubscriptions(byte *payload) {
   SubscribeMessage sub = SubscribeMessage(g_subscriptions);
   Serial1.println(sub.subscription); // Hacks; won't work with out this for some reason...
@@ -21,6 +20,7 @@ void init_msg_callbacks(void) {
   msg_names[EXAMPLE_SEND] = "examplesend";
   msg_names[BLINK_LED] = "blink";
   msg_names[LIDAR_DATA] = "lidar_data";
+  msg_names[ACCELEROMETER_DATA] = "accelerometer_data";
 }
 
 void subscribe(int msg_id, void (*callback)(byte *payload)) {
@@ -232,10 +232,12 @@ ExampleSendMessage::ExampleSendMessage(char *str) {
     length = strlen(str);
 }
 
-LidarDataMessage::LidarDataMessage(int dist, int ang) {
+LidarDataMessage::LidarDataMessage(int dist, float ang, int tilt_, int finished_) {
   distance = dist;
   angle = ang;
-  length = 2*sizeof(int);
+  tilt = tilt_;
+  finished = finished_;
+  length = 3*sizeof(int) + sizeof(float);
 }
 
 byte *LidarDataMessage::encode() {
@@ -243,7 +245,9 @@ byte *LidarDataMessage::encode() {
     payload[0] = id;
     int32_t index = 1;
     buffer_append_int32(payload, distance, &index);
-    buffer_append_int32(payload, angle, &index);
+    buffer_append_float32(payload, angle, 100, &index);
+    buffer_append_int32(payload, tilt, &index);
+    buffer_append_int32(payload, finished, &index);
     return payload;
 }
 
@@ -264,6 +268,22 @@ byte *CompassDataMessage::encode() {
   return payload;
 }
 
+AccelerometerDataMessage::AccelerometerDataMessage(float x_, float y_, float z_) {
+  x = x_;
+  y = y_;
+  z = z_;
+  length = 3*sizeof(float);
+}
+
+byte *AccelerometerDataMessage::encode() {
+  byte *payload = (byte*) malloc(length+1);
+  payload[0] = ACCELEROMETER_DATA;
+  int32_t index = 1;
+  buffer_append_float32(payload, x, 1000, &index);
+  buffer_append_float32(payload, y, 1000, &index);
+  buffer_append_float32(payload, z, 1000, &index);
+  return payload;
+}
 
 /*
  * The following are taken from Benjamin Vedder's bldc firmware:

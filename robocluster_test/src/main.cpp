@@ -20,9 +20,9 @@ void setup() {
 void loop() {
     send_message();
     digitalWrite(13, HIGH);
-    delay(1000);
+    delay(500);
     digitalWrite(13, LOW);
-    delay(1000);
-    while(!Serial.available()){}
-    Serial.read();
+    delay(500);
+    // while(!Serial.available()){}
+    // Serial.read();
 }

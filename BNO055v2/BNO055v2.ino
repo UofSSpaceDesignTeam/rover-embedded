@@ -4,7 +4,8 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <Robocluster.h>
-#include "VESCPacket.h"
+//#include "VESCPacket.h"
+#include <ArduinoJson.h>
 
 //#define DEV
 #ifdef DEV
@@ -76,6 +77,24 @@ void blink_led(byte* payload) {
   } else if(msg.value == 0){
     digitalWrite(13, LOW);
   }
+}
+
+void accelerometer_data(float x, float y, float z){
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& msg = jsonBuffer.createObject(); 
+  msg["x"] = x;
+  msg["y"] = y;
+  msg["z"] = z;
+  publish("AccelerometerDataMessage", &msg);
+}
+
+void compass_data(float heading, float pitch, float roll){
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& msg = jsonBuffer.createObject(); 
+  msg["heading"] = heading;
+  msg["pitch"] = pitch;
+  msg["roll"] = roll;
+  publish("CompassDataMessage", &msg);
 }
 
 void setup(void)
@@ -150,9 +169,9 @@ void loop(void)
     printf("acceleration: %f, %f, %f\n", x, y, z);
 
 #ifndef DEV
-    AccelerometerDataMessage msg = AccelerometerDataMessage(x, y, z);
+    accelerometer_data(x, y, z);
+    //AccelerometerDataMessage msg = AccelerometerDataMessage(x, y, z);
     //SendVESCPacket(&msg);
-    publish("AccelerometerDataMessage", &msg);
 #endif
   }
 
@@ -166,9 +185,9 @@ void loop(void)
     printf("heading: %f, pitch %f, roll %f\n", heading, pitch, roll);
 
 #ifndef DEV
-    CompassDataMessage msg = CompassDataMessage(heading, pitch, roll);
+    compass_data(heading, pitch, roll);
+    //CompassDataMessage msg = CompassDataMessage(heading, pitch, roll);
     //SendVESCPacket(&msg);
-    publish("CompassDataMessage", &msg);
 #endif
   }
 

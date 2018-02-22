@@ -3,7 +3,7 @@
 
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
-
+#include <Robocluster.h>
 #include "VESCPacket.h"
 
 //#define DEV
@@ -151,7 +151,8 @@ void loop(void)
 
 #ifndef DEV
     AccelerometerDataMessage msg = AccelerometerDataMessage(x, y, z);
-    SendVESCPacket(&msg);
+    //SendVESCPacket(&msg);
+    publish("AccelerometerDataMessage", &msg);
 #endif
   }
 
@@ -166,7 +167,8 @@ void loop(void)
 
 #ifndef DEV
     CompassDataMessage msg = CompassDataMessage(heading, pitch, roll);
-    SendVESCPacket(&msg);
+    //SendVESCPacket(&msg);
+    publish("CompassDataMessage", &msg);
 #endif
   }
 

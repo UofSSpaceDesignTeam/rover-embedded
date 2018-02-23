@@ -3,7 +3,7 @@
 
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
-#include <Robocluster.h>
+/* #include "Robocluster.h" */
 //#include "VESCPacket.h"
 #include <ArduinoJson.h>
 
@@ -32,6 +32,38 @@ void println(char* str) {}
 #define printf(...)
 
 #endif
+
+// From Robolcuster library
+
+char *g_device_name = "DEFAULT";
+
+void publish(String event, JsonObject& data){
+    String slash = "/"; //need to use for topic field
+    StaticJsonBuffer<200> jsonBuffer_publish;
+    JsonObject& root = jsonBuffer_publish.createObject();
+
+    root["source"] = g_device_name;
+    root["type"] = "publish";
+    JsonObject& data_nested = root.createNestedObject("data");
+    data_nested["topic"] = g_device_name + slash + event; 
+    data_nested["data"] = data;
+
+    root.printTo(Serial); //pass into serial
+}
+
+void heartbeat(){
+    StaticJsonBuffer<200> jsonBuffer_heartbeat;
+    JsonObject& root = jsonBuffer_heartbeat.createObject();
+
+    root["source"] = g_device_name;
+    root["type"] = "heartbeat";
+    JsonObject& data_nested = root.createNestedObject("data");
+    data_nested["source"] = g_device_name; 
+    data_nested["listen"] = "/dev/ttyACM0"; 
+    //I don't actually know what the port field should be so this is a wild guess
+
+    root.printTo(Serial); //pass into serial
+}
 
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (250)
@@ -70,14 +102,14 @@ void print_calibration() {
   );
 }
 
-void blink_led(byte* payload) {
-  BlinkMessage msg = BlinkMessage(payload);
-  if(msg.value == 1){ // arduino is little endian, network is big :(
-    digitalWrite(13,HIGH);
-  } else if(msg.value == 0){
-    digitalWrite(13, LOW);
-  }
-}
+/* void blink_led(byte* payload) { */
+/*   BlinkMessage msg = BlinkMessage(payload); */
+/*   if(msg.value == 1){ // arduino is little endian, network is big :( */
+/*     digitalWrite(13,HIGH); */
+/*   } else if(msg.value == 0){ */
+/*     digitalWrite(13, LOW); */
+/*   } */
+/* } */
 
 void accelerometer_data(float x, float y, float z){
   StaticJsonBuffer<200> jsonBuffer;
@@ -85,7 +117,7 @@ void accelerometer_data(float x, float y, float z){
   msg["x"] = x;
   msg["y"] = y;
   msg["z"] = z;
-  publish("AccelerometerDataMessage", &msg);
+  publish("AccelerometerDataMessage", msg);
 }
 
 void compass_data(float heading, float pitch, float roll){
@@ -94,12 +126,12 @@ void compass_data(float heading, float pitch, float roll){
   msg["heading"] = heading;
   msg["pitch"] = pitch;
   msg["roll"] = roll;
-  publish("CompassDataMessage", &msg);
+  publish("CompassDataMessage", msg);
 }
 
 void setup(void)
 {
-  init_msg_callbacks();
+  /* init_msg_callbacks(); */
 
   Serial.begin(115200);
 
@@ -117,7 +149,7 @@ void setup(void)
 
   delay(1000);
 
-  subscribe(BLINK_LED, blink_led);
+  /* subscribe(BLINK_LED, blink_led); */
 }
 
 

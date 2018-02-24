@@ -35,7 +35,7 @@ void println(char* str) {}
 
 // From Robolcuster library
 
-char *g_device_name = "DEFAULT";
+char *g_device_name = "BNO055";
 
 void publish(String event, JsonObject& data){
     String slash = "/"; //need to use for topic field
@@ -48,6 +48,7 @@ void publish(String event, JsonObject& data){
     data_nested["topic"] = g_device_name + slash + event; 
     data_nested["data"] = data;
 
+    Serial.print(0x0);
     root.printTo(Serial); //pass into serial
 }
 
@@ -62,6 +63,7 @@ void heartbeat(){
     data_nested["listen"] = "/dev/ttyACM0"; 
     //I don't actually know what the port field should be so this is a wild guess
 
+    Serial.print(0x0);
     root.printTo(Serial); //pass into serial
 }
 
@@ -117,7 +119,7 @@ void accelerometer_data(float x, float y, float z){
   msg["x"] = x;
   msg["y"] = y;
   msg["z"] = z;
-  publish("AccelerometerDataMessage", msg);
+  publish("accelerometer", msg);
 }
 
 void compass_data(float heading, float pitch, float roll){
@@ -126,7 +128,7 @@ void compass_data(float heading, float pitch, float roll){
   msg["heading"] = heading;
   msg["pitch"] = pitch;
   msg["roll"] = roll;
-  publish("CompassDataMessage", msg);
+  publish("magnetometer", msg);
 }
 
 void setup(void)
@@ -173,6 +175,7 @@ imu::Vector<3> prev_avg(imu::Vector<3> prev[AVG_LENGTH]) {
 
 void loop(void)
 {
+  heartbeat();
   uint8_t system, gyro, accel, mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
 

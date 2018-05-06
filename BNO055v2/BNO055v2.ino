@@ -158,20 +158,21 @@ void loop(void)
 #endif
   }
 
-  if (gyro >= 1 && mag >= 1 && accel >= 1) {
+  /* if (gyro >= 1 && mag >= 1 && accel >= 1) { */
+  if (1) {
     vec3 = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
     imu::Vector<3> accel = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
-    imu::Quaternion quat = bno.getQuat();
+    /* imu::Quaternion quat = bno.getQuat(); */
 
     float heading = vec3.x();
     float roll   = vec3.y();
     float pitch    = vec3.z();
 
     /* printf("Quaternion x: %f\t y: %f\t z: %f\t w: %f\n", quat.x(), quat.y(), quat.z(), quat.w()) */
-    float qr = quat.w();
-    float qi = quat.x();
-    float qj = quat.y();
-    float qk = quat.z();
+    /* float qr = quat.w(); */
+    /* float qi = quat.x(); */
+    /* float qj = quat.y(); */
+    /* float qk = quat.z(); */
 
      /* float s = sqrt(qr*qr+qi*qi+qj*qj+qk*qk); */
      /* qr /= s; */
@@ -249,6 +250,11 @@ void loop(void)
     AccelerometerDataMessage amsg = AccelerometerDataMessage(axe, aye, aze);
     SendVESCPacket(&amsg);
 #endif
+  } else {
+    CompassDataMessage msg = CompassDataMessage(-42, -42, -42);
+    SendVESCPacket(&msg);
+    AccelerometerDataMessage amsg = AccelerometerDataMessage(0, 0, 0);
+    SendVESCPacket(&amsg);
   }
 
   prev_index = (prev_index + 1) % 10;

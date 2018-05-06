@@ -169,6 +169,6 @@ public:
 	StartLidarScan(byte *payload);
 	byte *encode();
 
-}
+};
 
 #endif

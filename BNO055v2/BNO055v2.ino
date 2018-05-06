@@ -5,8 +5,10 @@
 #include <Adafruit_BNO055.h>
 
 #include "VESCPacket.h"
+#include "vector.h"
+#include "math.h"
 
-//#define DEV
+#define DEV
 #ifdef DEV
 
 void print(char* str) {
@@ -93,6 +95,7 @@ void setup(void)
 
   /* Restore calibration */
   bno.setSensorOffsets(bno_calibration);
+  bno.setMode(Adafruit_BNO055::OPERATION_MODE_COMPASS);
 
   print("\nInitialized!\n");
 
@@ -134,7 +137,7 @@ void loop(void)
    * system = 3 -> good to go
    */
 
-  printf("system: %u, gyro %u, accel %u, mag %u\n", system, gyro, accel, mag);
+  //printf("system: %u, gyro %u, accel %u, mag %u\n", system, gyro, accel, mag);
 
   /* we like to live dangerously so lets disable the system check ;)
   if (system < 1) return;
@@ -147,7 +150,7 @@ void loop(void)
     float y = vec3.y();
     float z = vec3.z();
 
-    printf("acceleration: %f, %f, %f\n", x, y, z);
+    /* printf("acceleration: %f, %f, %f\n", x, y, z); */
 
 #ifndef DEV
     AccelerometerDataMessage msg = AccelerometerDataMessage(x, y, z);
@@ -155,14 +158,63 @@ void loop(void)
 #endif
   }
 
-  if (gyro >= 1 && mag >= 1) {
+  if (gyro >= 1 && mag >= 1 && accel >= 1) {
     vec3 = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+    imu::Vector<3> accel = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    imu::Quaternion quat = bno.getQuat();
 
     float heading = vec3.x();
     float pitch   = vec3.y();
     float roll    = vec3.z();
 
-    printf("heading: %f, pitch %f, roll %f\n", heading, pitch, roll);
+    /* printf("Quaternion x: %f\t y: %f\t z: %f\t w: %f\n", quat.x(), quat.y(), quat.z(), quat.w()) */
+    float qr = quat.w();
+    float qi = quat.x();
+    float qj = quat.y();
+    float qk = quat.z();
+
+     float s = sqrt(qr*qr+qi*qi+qj*qj+qk*qk);
+     qr /= s;
+     qi /= s;
+     qj /= s;
+     qk /= s;
+    //float s = 1;
+    float RotationMat[3][3] = {
+        {1-2*s*(qj*qj+qk*qk), 2*s*(qi*qj-qk*qr), 2*s*(qi*qk+qj*qr)},
+        {2*s*(qi*qj+qk*qr), 1-2*s*(qi*qi+qk*qk), 2*s*(qj*qk-qi*qk)},
+        {2*s*(qi*qk-qj*qr), 2*s*(qj*qk+qi*qr), 1-2*s*(qi*qi+qj*qj)}
+    };
+/* double rm[3][3]; */
+/*  */
+/* rm[1][1] = quat.w()*quat.w() + quat.x()*quat.x() - quat.y()*quat.y() - quat.z()*quat.z();    */
+/* rm[1][2] = 2*quat.x()*quat.y() - 2*quat.w()*quat.z();             */
+/* rm[1][3] = 2*quat.x()*quat.z() + 2*quat.w()*quat.y(); */
+/* rm[2][1] = 2*quat.x()*quat.y() + 2*quat.w()*quat.z();        */
+/* rm[2][2] = quat.w()*quat.w() - quat.x()*quat.x() + quat.y()*quat.y() - quat.z()*quat.z();           */
+/* rm[2][3] = 2*quat.y()*quat.z() - 2*quat.w()*quat.x();      */
+/* rm[3][1] = 2*quat.x()*quat.z() - 2*quat.w()*quat.y();        */
+/* rm[3][2] = 2*quat.y()*quat.z() + 2*quat.w()*quat.x();             */
+/* rm[3][3] = quat.w()*quat.w() - quat.x()*quat.x() - quat.y()*quat.y() + quat.z()*quat.z(); */
+
+    double InverseRotMat[3][3];
+    double determinant;
+    INVERT_3X3(InverseRotMat, determinant, RotationMat);
+    /* printf("%f\t %f\t %f\n", InverseRotMat[0][0], InverseRotMat[0][1], InverseRotMat[0][2]); */
+    /* printf("%f\t %f\t %f\n", InverseRotMat[1][0], InverseRotMat[1][1], InverseRotMat[1][2]); */
+    /* printf("%f\t %f\t %f\n", InverseRotMat[2][0], InverseRotMat[2][1], InverseRotMat[2][2]); */
+    double an = InverseRotMat[0][0]*accel.x() + InverseRotMat[0][1]*accel.y() + InverseRotMat[0][2]*accel.z();
+    double ae = InverseRotMat[1][0]*accel.x() + InverseRotMat[1][1]*accel.y() + InverseRotMat[1][2]*accel.z();
+    double ad = InverseRotMat[2][0]*accel.x() + InverseRotMat[2][1]*accel.y() + InverseRotMat[2][2]*accel.z();
+
+    double ax = RotationMat[0][0]*0 + RotationMat[0][1]*0 + RotationMat[0][2]*9.8;
+    double ay = RotationMat[1][0]*0 + RotationMat[1][1]*0 + RotationMat[1][2]*9.8;
+    double az = RotationMat[2][0]*0 + RotationMat[2][1]*0 + RotationMat[2][2]*9.8;
+    //printf("Absolute Accel: an: %f\t ae: %f\t ad: %f\n", an, ae, ad);
+    printf("Relative Accel: ax: %f\t ay: %f\t az: %f\n", ax, ay, az);
+    printf("Read Accel: ax: %f\t ay: %f\t az: %f\n", accel.x(), accel.y(), accel.z());
+
+
+    //printf("heading: %f, pitch %f, roll %f\n", heading, pitch, roll);
 
 #ifndef DEV
     CompassDataMessage msg = CompassDataMessage(heading, pitch, roll);
@@ -171,6 +223,6 @@ void loop(void)
   }
 
   prev_index = (prev_index + 1) % 10;
-  print_calibration();
+  //print_calibration();
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }

@@ -8,7 +8,7 @@
 #include "vector.h"
 #include "math.h"
 
-#define DEV
+/* #define DEV */
 #ifdef DEV
 
 void print(char* str) {
@@ -95,7 +95,7 @@ void setup(void)
 
   /* Restore calibration */
   bno.setSensorOffsets(bno_calibration);
-  bno.setMode(Adafruit_BNO055::OPERATION_MODE_COMPASS);
+  /* bno.setMode(Adafruit_BNO055::OPERATION_MODE_COMPASS); */
 
   print("\nInitialized!\n");
 
@@ -153,8 +153,8 @@ void loop(void)
     /* printf("acceleration: %f, %f, %f\n", x, y, z); */
 
 #ifndef DEV
-    AccelerometerDataMessage msg = AccelerometerDataMessage(x, y, z);
-    SendVESCPacket(&msg);
+    //AccelerometerDataMessage msg = AccelerometerDataMessage(x, y, z);
+    //SendVESCPacket(&msg);
 #endif
   }
 
@@ -164,8 +164,8 @@ void loop(void)
     imu::Quaternion quat = bno.getQuat();
 
     float heading = vec3.x();
-    float pitch   = vec3.y();
-    float roll    = vec3.z();
+    float roll   = vec3.y();
+    float pitch    = vec3.z();
 
     /* printf("Quaternion x: %f\t y: %f\t z: %f\t w: %f\n", quat.x(), quat.y(), quat.z(), quat.w()) */
     float qr = quat.w();
@@ -173,52 +173,81 @@ void loop(void)
     float qj = quat.y();
     float qk = quat.z();
 
-     float s = sqrt(qr*qr+qi*qi+qj*qj+qk*qk);
-     qr /= s;
-     qi /= s;
-     qj /= s;
-     qk /= s;
-    //float s = 1;
-    float RotationMat[3][3] = {
-        {1-2*s*(qj*qj+qk*qk), 2*s*(qi*qj-qk*qr), 2*s*(qi*qk+qj*qr)},
-        {2*s*(qi*qj+qk*qr), 1-2*s*(qi*qi+qk*qk), 2*s*(qj*qk-qi*qk)},
-        {2*s*(qi*qk-qj*qr), 2*s*(qj*qk+qi*qr), 1-2*s*(qi*qi+qj*qj)}
+     /* float s = sqrt(qr*qr+qi*qi+qj*qj+qk*qk); */
+     /* qr /= s; */
+     /* qi /= s; */
+     /* qj /= s; */
+     /* qk /= s; */
+    /* printf("Normalized Quaternion r: %f\t i: %f\t j: %f\t k: %f\n", qr, qi, qj, qk) */
+    /* float s = 1; */
+    /* double RotationMat[3][3] = { */
+    /*     {1-2*s*(qj*qj+qk*qk), 2*s*(qi*qj-qk*qr), 2*s*(qi*qk+qj*qr)}, */
+    /*     {2*s*(qi*qj+qk*qr), 1-2*s*(qi*qi+qk*qk), 2*s*(qj*qk-qi*qk)}, */
+    /*     {2*s*(qi*qk-qj*qr), 2*s*(qj*qk+qi*qr), 1-2*s*(qi*qi+qj*qj)} */
+    /* }; */
+
+    float psi = radians(heading);
+    float theta = radians(pitch);
+    float phi = radians(roll);
+    /* double eulerRM[3][3] = { */
+    /*     {cos(theta)*cos(psi), sin(psi)*cos(theta), -sin(theta)}, */
+    /*     {-cos(phi)*sin(psi)+sin(phi)*sin(theta)*cos(phi), cos(phi)*cos(psi)+sin(phi)*sin(psi), sin(phi)*cos(theta)}, */
+    /*     {sin(phi)*sin(psi)+cos(phi)*sin(theta)*cos(psi), -sin(phi)*cos(psi)+cos(phi)*sin(theta)*sin(psi), cos(phi)*cos(theta)} */
+    /* }; */
+    /* double eulerRMT[3][3] = { */
+    /*     {cos(theta)*cos(psi), sin(phi)*sin(theta)*cos(psi)-cos(phi)*sin(psi), cos(phi)*sin(theta)*cos(psi)+sin(phi)*sin(psi)}, */
+    /*     {cos(theta)*sin(psi), sin(phi)*sin(theta)*sin(psi)+cos(phi)*cos(psi), cos(phi)*sin(theta)*sin(psi)-sin(phi)*cos(psi)}, */
+    /*     {-sin(theta), sin(phi)*cos(theta), cos(phi)*cos(theta)} */
+    /* }; */
+    float eulerRMYaw[3][3] = {
+        {cos(psi), -sin(psi), 0},
+        {sin(psi), cos(psi), 0},
+        {0,0,1}
     };
+    /* TRANSPOSE_MATRIX_3X3(eulerRMT, eulerRM); */
 /* double rm[3][3]; */
 /*  */
-/* rm[1][1] = quat.w()*quat.w() + quat.x()*quat.x() - quat.y()*quat.y() - quat.z()*quat.z();    */
-/* rm[1][2] = 2*quat.x()*quat.y() - 2*quat.w()*quat.z();             */
-/* rm[1][3] = 2*quat.x()*quat.z() + 2*quat.w()*quat.y(); */
-/* rm[2][1] = 2*quat.x()*quat.y() + 2*quat.w()*quat.z();        */
-/* rm[2][2] = quat.w()*quat.w() - quat.x()*quat.x() + quat.y()*quat.y() - quat.z()*quat.z();           */
-/* rm[2][3] = 2*quat.y()*quat.z() - 2*quat.w()*quat.x();      */
-/* rm[3][1] = 2*quat.x()*quat.z() - 2*quat.w()*quat.y();        */
-/* rm[3][2] = 2*quat.y()*quat.z() + 2*quat.w()*quat.x();             */
-/* rm[3][3] = quat.w()*quat.w() - quat.x()*quat.x() - quat.y()*quat.y() + quat.z()*quat.z(); */
-
+/* rm[0][0] = quat.w()*quat.w() + quat.x()*quat.x() - quat.y()*quat.y() - quat.z()*quat.z(); */
+/* rm[0][1] = 2*quat.x()*quat.y() - 2*quat.w()*quat.z(); */
+/* rm[0][2] = 2*quat.x()*quat.z() + 2*quat.w()*quat.y(); */
+/* rm[1][0] = 2*quat.x()*quat.y() + 2*quat.w()*quat.z(); */
+/* rm[1][1] = quat.w()*quat.w() - quat.x()*quat.x() + quat.y()*quat.y() - quat.z()*quat.z(); */
+/* rm[1][2] = 2*quat.y()*quat.z() - 2*quat.w()*quat.x(); */
+/* rm[2][0] = 2*quat.x()*quat.z() - 2*quat.w()*quat.y(); */
+/* rm[2][1] = 2*quat.y()*quat.z() + 2*quat.w()*quat.x(); */
+/* rm[2][2] = quat.w()*quat.w() - quat.x()*quat.x() - quat.y()*quat.y() + quat.z()*quat.z(); */
+/*  */
     double InverseRotMat[3][3];
     double determinant;
-    INVERT_3X3(InverseRotMat, determinant, RotationMat);
+    /* INVERT_3X3(InverseRotMat, determinant, eulerRMYaw); */
+    /* print("Euler RM:\n"); */
+    /* printf("%f\t %f\t %f\n", eulerRM[0][0], eulerRM[0][1], eulerRM[0][2]); */
+    /* printf("%f\t %f\t %f\n", eulerRM[1][0], eulerRM[1][1], eulerRM[1][2]); */
+    /* printf("%f\t %f\t %f\n", eulerRM[2][0], eulerRM[2][1], eulerRM[2][2]); */
+    /* printf("Determinant %f\n", determinant); */
+    /* printf("Inverse Euler RM:\n"); */
     /* printf("%f\t %f\t %f\n", InverseRotMat[0][0], InverseRotMat[0][1], InverseRotMat[0][2]); */
     /* printf("%f\t %f\t %f\n", InverseRotMat[1][0], InverseRotMat[1][1], InverseRotMat[1][2]); */
     /* printf("%f\t %f\t %f\n", InverseRotMat[2][0], InverseRotMat[2][1], InverseRotMat[2][2]); */
-    double an = InverseRotMat[0][0]*accel.x() + InverseRotMat[0][1]*accel.y() + InverseRotMat[0][2]*accel.z();
-    double ae = InverseRotMat[1][0]*accel.x() + InverseRotMat[1][1]*accel.y() + InverseRotMat[1][2]*accel.z();
-    double ad = InverseRotMat[2][0]*accel.x() + InverseRotMat[2][1]*accel.y() + InverseRotMat[2][2]*accel.z();
+    double axe = eulerRMYaw[0][0]*accel.x() + eulerRMYaw[0][1]*accel.y() + eulerRMYaw[0][2]*accel.z();
+    double aye = eulerRMYaw[1][0]*accel.x() + eulerRMYaw[1][1]*accel.y() + eulerRMYaw[1][2]*accel.z();
+    double aze = eulerRMYaw[2][0]*accel.x() + eulerRMYaw[2][1]*accel.y() + eulerRMYaw[2][2]*accel.z();
 
-    double ax = RotationMat[0][0]*0 + RotationMat[0][1]*0 + RotationMat[0][2]*9.8;
-    double ay = RotationMat[1][0]*0 + RotationMat[1][1]*0 + RotationMat[1][2]*9.8;
-    double az = RotationMat[2][0]*0 + RotationMat[2][1]*0 + RotationMat[2][2]*9.8;
-    //printf("Absolute Accel: an: %f\t ae: %f\t ad: %f\n", an, ae, ad);
-    printf("Relative Accel: ax: %f\t ay: %f\t az: %f\n", ax, ay, az);
-    printf("Read Accel: ax: %f\t ay: %f\t az: %f\n", accel.x(), accel.y(), accel.z());
+    /* double ax = rm[0][0]*0 + rm[0][1]*0 + rm[0][2]*9.8; */
+    /* double ay = rm[1][0]*0 + rm[1][1]*0 + rm[1][2]*9.8; */
+    /* double az = rm[2][0]*0 + rm[2][1]*0 + rm[2][2]*9.8; */
+    printf("Absolute Accel: ae: %f\t an: %f\t ad: %f\n", axe, aye, aze);
+    /* printf("Relative Accel: ax: %f\t ay: %f\t az: %f\n", ax, ay, az); */
+    /* printf("Read Accel: ax: %f\t ay: %f\t az: %f\n", accel.x(), accel.y(), accel.z()); */
 
 
-    //printf("heading: %f, pitch %f, roll %f\n", heading, pitch, roll);
+    printf("heading: %f, pitch %f, roll %f\n", heading, pitch, roll);
 
 #ifndef DEV
     CompassDataMessage msg = CompassDataMessage(heading, pitch, roll);
     SendVESCPacket(&msg);
+    AccelerometerDataMessage amsg = AccelerometerDataMessage(axe, aye, aze);
+    SendVESCPacket(&amsg);
 #endif
   }
 

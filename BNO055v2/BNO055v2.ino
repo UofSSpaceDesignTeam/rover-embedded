@@ -35,7 +35,7 @@ void println(char* str) {}
 #endif
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (250)
+#define BNO055_SAMPLERATE_DELAY_MS (1000)
 
 Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS_A);
 
@@ -168,6 +168,44 @@ void loop(void)
     float roll   = vec3.y();
     float pitch    = vec3.z();
 
+    /*
+    Skylar's nonsense
+    vec3s = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+    float pitchs = pitch;
+    float gam1;
+    float gam2;
+    if (pitchs < 0){
+      pitchs = pitchs*(-1);
+    }
+    float rolls = roll; 
+    if (rolls < 0){
+      rolls = rolls*(-1);
+    }   
+    if (heading < 90){
+      gam1 = 90 - heading;
+    }
+    else{
+      gam1 = 450 - heading;
+    }
+    if (gam1 < 90){
+      gam2 = 270 + gam1;
+    }
+    else {
+      gam2 = gam1 - 90;
+    }
+    float a1 = vec3s.y();
+    float a2 = vec3s.x();
+    float afp = a1*cos(pitchs);
+    float afr = a2*cos(rolls);
+    float ax1 = afp*cos(gam1);
+    float ay1 = afp*sin(gam1);
+    float ax2 = afr*cos(gam2);
+    float ay2 = afr*sin(gam2);
+    float axs = ax1 + ax2;
+    float ays = ay1 + ay2;
+    End of Skylars nonsense
+    */
+    
     /* printf("Quaternion x: %f\t y: %f\t z: %f\t w: %f\n", quat.x(), quat.y(), quat.z(), quat.w()) */
     /* float qr = quat.w(); */
     /* float qi = quat.x(); */

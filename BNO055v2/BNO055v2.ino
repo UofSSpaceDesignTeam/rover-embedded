@@ -35,7 +35,7 @@ void println(char* str) {}
 #endif
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (1000)
+#define BNO055_SAMPLERATE_DELAY_MS (250)
 
 Adafruit_BNO055 bno = Adafruit_BNO055(-1, BNO055_ADDRESS_A);
 

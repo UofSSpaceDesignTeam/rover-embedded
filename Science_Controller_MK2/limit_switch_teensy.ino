@@ -29,8 +29,7 @@
 
 void setup() {
     Serial.begin(115000);
-    set_name("Limit Switch Array")
-    pinMode(ARDUINO_SEND, OUTPUT);
+    //set_name("Limit Switch Array")
     pinMode(DRILL_1_TOP_SEND, OUTPUT);
     pinMode(DRILL_1_TOP_READ, INPUT);
     pinMode(DRILL_2_TOP_SEND, OUTPUT);
@@ -45,81 +44,81 @@ void setup() {
     pinMode(CAROUSEL_DUMP_READ, INPUT);
 }
 
-void drill_1_top(){
+char drill_1_top(){
     if (digitalRead(DRILL_1_TOP_READ) == HIGH){
-        return 'A'
+        return 'A';
     }
     else if (digitalRead(DRILL_1_TOP_READ) == LOW){
-        return 'H'
+        return 'H';
     }
     else{
-        return 'E'
+        return 'E';
     }
 }
-
-void drill_2_top(){
+char drill_2_top(){
     if (digitalRead(DRILL_2_TOP_READ) == HIGH){
-        return 'A'
+        return 'A';
     }
     else if (digitalRead(DRILL_2_TOP_READ) == LOW){
-        return 'H'
+        return 'H';
     }
     else{
-        return 'E'
+        return 'E';
     }
 }
 
-void drill_1_bottom(){
+char drill_1_bottom(){
     if (digitalRead(DRILL_1_BOTTOM_READ) == HIGH){
-        return 'A'
+        return 'A';
     }
     else if (digitalRead(DRILL_1_BOTTOM_READ) == LOW){
-        return 'H'
+        return 'H';
     }
     else{
-        return 'E'
+        return 'E';
     }
 }
 
-void drill_2_bottom(){
+char drill_2_bottom(){
     if (digitalRead(DRILL_2_BOTTOM_READ) == HIGH){
-        return 'A'
+        return 'A';
     }
     else if (digitalRead(DRILL_2_BOTTOM_READ) == LOW){
-        return 'H'
+        return 'H';
     }
     else{
-        return 'E'
+        return 'E';
     }
 }
 
-void carousel_sample(){
+char carousel_sample(){
     if (digitalRead(CAROUSEL_SAMPLE_READ) == HIGH){
-        return 'A'
+        return 'A';
     }
     else if (digitalRead(CAROUSEL_SAMPLE_READ) == LOW){
-        return 'H'
+        return 'H';
     }
     else{
-        return 'E'
+        return 'E';
     }
 }
 
-void carousel_dump(){
+char carousel_dump(){
     if (digitalRead(CAROUSEL_DUMP_READ) == HIGH){
-        return 'A' // away
+        return 'A'; // away
     }
     else if (digitalRead(CAROUSEL_DUMP_READ) == LOW){
-        return 'H' // here
+        return 'H'; // here
     }
     else{
-        return 'E' // error
+        return 'E'; // error
     }
 }
 
 
 void loop() {
-    sprintf(buffer, "{\"data\":[%c,%c,%c,%c,%c,%c]}",drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
+    //sprintf(buffer, "{\"data\":[%c,%c,%c,%c,%c,%c]}", drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
+    sprintf(buffer, 'hi');
     Publish(buffer);
     delay(10);
 }

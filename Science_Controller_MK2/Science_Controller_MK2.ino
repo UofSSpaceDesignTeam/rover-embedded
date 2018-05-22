@@ -19,18 +19,20 @@ Adafruit_MAX31856 max = Adafruit_MAX31856(9, 10, 11, 12);
 
 // Drill snap action switch pins 
 const int drillDown = 13;
-const int drillUP = 14;
+const int drillUP = 14; // LG - check if this means drill home. Should maybe have extra checks in case of false positive
 const int sampleLoading = 15;
 
 // Other Stuff
-int i; // iteration variable 
+int i; // iteration variable
+/*
+  LG - iteration variables should be local, use flags to work globally. Too many possible issues with global counter
+*/ 
 const int TotalSteps = 400; // Steps for one full rotation 
 
 // Sets Pins and Sets everything so that initially nothing happens
 void setup() {
   Serial.begin(115200);
   pinMode(emitter, OUTPUT);
-  pinMode(chopperMotor, OUTPUT);
   pinMode(carouselMotor, OUTPUT);
   pinMode(carouselStep, OUTPUT);
   pinMode(carouselDirection, OUTPUT);
@@ -39,13 +41,16 @@ void setup() {
   digitalWrite(carouselStep,LOW);
   digitalWrite(carouselDirection, LOW);
   digitalWrite(carouselMotor, HIGH);
-  digitalWrite(chopperMotor, LOW);
   digitalWrite(emitter, LOW);
   digitalWrite(zeroSwitchInput,HIGH);
 }
 
 // Carousel
 // Runs the Carousel, choose direction, speed, # of steps
+/*
+  LG - should choose a set speed and never change it
+     - should also only move in one direction, way easier to keep track of where the motor is, and that way we only have to know how many steps   we want
+*/
 void runCarousel(boolean direction, double speed, int stepCount){
   digitalWrite(carouselDirection, direction);
   digitalWrite(carouselMotor, HIGH);
@@ -60,6 +65,9 @@ void runCarousel(boolean direction, double speed, int stepCount){
 
 // Carousel 
 // Delay function based on input speed
+/*
+  LG - What is this for?
+*/
 void delayer(double speed){
     long holdTime_us = (long)(1.0 / (double) TotalSteps / speed / 2.0 * 1E6);
   int overflowCount = holdTime_us / 65535;
@@ -71,6 +79,9 @@ void delayer(double speed){
 
 // Carousel
 // Zeroing function, moves blocker in front of science module
+/*
+  LG - why is the counter being used in here?
+*/
 void zeroer(){
   for (i = 0; i < 1;){
      if (digitalRead(zeroSwitch) == HIGH){
@@ -88,8 +99,10 @@ void zeroer(){
 void thermocouple(){
   Serial.print("Cold Junction Temp: "); Serial.println(max.readCJTemperature());
   //Serial.println(max.readThermocoupleTemperature()); // It always wants to print out 0 before itll print out the temp so this just does that instead of having the "cold junction temp: " bit equal to 0 which is more confusing
-  
-
+/*
+  LG - probably a different way around this. Low priority fix
+     - below should be its own method when rewritten as class
+*/
   Serial.print("Thermocouple Temp: "); Serial.println(max.readThermocoupleTemperature());
   // Check and print any faults
   uint8_t fault = max.readFault();
@@ -107,6 +120,9 @@ void thermocouple(){
 }
 
 // Moisture Sensor
+/*
+  LG - these conversions are gross but I'm not sure if there's a way to clean it up
+*/
 void moistureSensor(){
   //Equation 4 from 10HS manual
   float moistsensorVal = analogRead(moistsensor);  
@@ -125,6 +141,10 @@ void moistureSensor(){
 
 
 // Detector
+/* 
+  LG - this should be written as a while loop while a certain master task is happening. 
+     - Set up spectrometer compsite instrument which controls both emitter and detector. 
+*/
 void detectorLoop(){
   for (i = 0; i < 100; i++){
     Serial.print("Infrared Intensity: "); Serial.println(sensor);
@@ -132,24 +152,9 @@ void detectorLoop(){
   }
 }
 
-// Drill down or up 
-void Drill(){
-  for (i = 0; i<1;){
-    if (digitalRead(drillDown) == HIGH){
-      delay(100);
-    }
-    if (digitalRead(drillUP) == LOW){
-      delay(100);
-    }
-    if (digitalRead(drillUP) == HIGH){
-      i = 1;
-    }
-    if (digitalRead(sampleLoading) == HIGH){
-      delay(100);
-    }
-  }
-} 
-
+/*
+  LG - don't like this loop method. Poses too many issues with things getting stuck on, and restricts failsafes. Should be made into a master control script with human confirmation at each major step
+*/
 void loop() {
   // 124 does a half rotation, for the motor at least have to check on how it affects the gears and stuff
   // Working well at 120-140 mA 10.8 V while active and 500 mA 10.8 V while inactive
@@ -177,15 +182,10 @@ void loop() {
   delay(1000);
 
   // Turns on Science Module for sample 1
-  digitalWrite(chopperMotor, HIGH);
   digitalWrite(emitter, HIGH);
   detectorLoop();
-  digitalWrite(chopperMotor, LOW);
   digitalWrite(emitter, LOW);
   Drill();
-
-  //Zeros again
-  zeroer();
 
   // Rotates dump to drill
   Drill();
@@ -197,66 +197,6 @@ void loop() {
   // Zeros again
   zeroer();
 
-  // Rotates 2 to drill 
-  Drill();
-  runCarousel(true, 10, 81+324);
-  delay(1000);
-  Drill();
-  delay(1000);
-
-  // Rotates 2 to science module
-  Drill();
-  runCarousel(true, 10, 324);
-  delay(1000);
-
-  // Turns on Science Module for sample 2
-  digitalWrite(chopperMotor, HIGH);
-  digitalWrite(emitter, HIGH);
-  detectorLoop();
-  digitalWrite(chopperMotor, LOW);
-  digitalWrite(emitter, LOW);
-  Drill();
-
-  //Zeros again
-  zeroer();
-
-  // Rotates dump to drill
-  Drill();
-  runCarousel(true, 10, 162);
-  delay(1000);
-  Drill();
-  delay(1000);
-
-  //Zeros again
-  zeroer();
-
-  // Rotates 3 to drill 
-  Drill();
-  runCarousel(true, 10, 324-81);
-  delay(1000);
-  Drill();
-  delay(1000);
-
-  // Rotates 3 to science module
-  Drill();
-  runCarousel(true, 10, 324);
-  delay(1000);
-  Drill();
-  delay(1000);
-
-  // Turns on Science Module for sample 3
-  digitalWrite(chopperMotor, HIGH);
-  digitalWrite(emitter, HIGH);
-  detectorLoop();
-  digitalWrite(chopperMotor, LOW);
-  digitalWrite(emitter, LOW);
-  Drill();
-
-  // Rotates block back into place
-  zeroer();
-  delay(1000);
- 
-  
   // Can exit the loop with this exit function
   //exit(0);
 }

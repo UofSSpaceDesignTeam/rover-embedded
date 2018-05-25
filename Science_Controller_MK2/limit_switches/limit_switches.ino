@@ -1,5 +1,5 @@
 // Code to run all limit switches off of a Teensy board, and relay this data to an Arduino Uno
- // #include "Robocluster.h"
+#include "Robocluster.h"
 
   // Drill Stage 1 Top Switch
   const int DRILL_1_TOP_SEND = 1;
@@ -123,8 +123,8 @@ char carousel_dump(){
 
 
 void loop() {
-    sprintf(buffer, "{\"data\":[%c,%c,%c,%c,%c,%c]}", drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
-    Serial.println(buffer);
-    //Publish(buffer);
+    sprintf(buffer, "{\"data\":[\"%c\",\"%c\",\"%c\",\"%c\",\"%c\",\"%c\"]}", drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
+    //Serial.println(buffer);
+    Publish(buffer);
     delay(10);
 }

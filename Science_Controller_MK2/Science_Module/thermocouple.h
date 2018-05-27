@@ -2,13 +2,14 @@
 // Needs calibration
 
 #include "Adafruit_MAX31856.h"
+#include "Robocluster.h"
 
 Adafruit_MAX31856 max = Adafruit_MAX31856(9, 10, 11, 12);
 
-char th_buffer[1024];
+char th_buffer[BUFF_SIZE];
 
 // This isn't going to work properly right now
-void parse_fault()  {
+char* parse_fault()  {
         if (max.readFault() & MAX31856_FAULT_CJRANGE)   {
             return("Cold Junction Range Fault");
         }
@@ -74,5 +75,6 @@ void read_temperature() {
     else    {
         sprintf(th_buffer, "{\"data\":[\"%c\",\"%c\"]}", max.readCJTemperature(), max.readThermocoupleTemperature());    
     }
-    Publish(buffer);
+    Publish(th_buffer);
+    s_delay(1000);
 }

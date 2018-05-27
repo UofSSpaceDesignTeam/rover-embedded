@@ -12,10 +12,9 @@ char *DEVICE_NAME = "TestName";
 void (*g_message_handler)(char*) = dummy_handler;
 
 
-void serialEvent() {
+void testserialEvent() {
     //digitalWrite(13, HIGH);
     char buff[BUFF_SIZE];
-    memset(buff, 0, BUFF_SIZE);
     char b[10];
     b[0] = Serial.read();
     if (b[0] == 0x02 || b[0] == 0x03) {
@@ -46,7 +45,7 @@ void Publish(char *message) {
 
 void s_delay(int value) {
     if (Serial.available()) {
-        serialEvent();
+        testserialEvent();
     }
     delay(value);
 

@@ -1,7 +1,3 @@
-#ifndef ROBOCLUSTER
-#define ROBOCLUSTER
-
-#define BUFF_SIZE 512
 
 void dummy_handler(char*) {
     // This does nothing, but you can define your own
@@ -13,9 +9,8 @@ void (*g_message_handler)(char*) = dummy_handler;
 
 
 void serialEvent() {
-    //digitalWrite(13, HIGH);
-    char buff[BUFF_SIZE];
-    memset(buff, 0, BUFF_SIZE);
+    digitalWrite(13, HIGH);
+    char buff[1024];
     char b[10];
     b[0] = Serial.read();
     if (b[0] == 0x02 || b[0] == 0x03) {
@@ -27,7 +22,7 @@ void serialEvent() {
         Serial.readBytes(buff, b[0]);
         g_message_handler(buff);
     }
-    //digitalWrite(13, LOW);
+    digitalWrite(13, LOW);
 }
 
 void set_name(char* s) {
@@ -44,12 +39,4 @@ void Publish(char *message) {
     Serial.print(message);
 }
 
-void s_delay(int value) {
-    if (Serial.available()) {
-        serialEvent();
-    }
-    delay(value);
 
-}
-
-#endif

@@ -5,7 +5,7 @@
 
 Adafruit_MAX31856 max = Adafruit_MAX31856(9, 10, 11, 12);
 
-char buffer[1024];
+char th_buffer[1024];
 
 // This isn't going to work properly right now
 void parse_fault()  {
@@ -69,10 +69,10 @@ void parse_fault()  {
 void read_temperature() {
     if (max.readFault()) {
         // Won't work properly right now 
-        sprintf(buffer, "{\"data\":[\"%c\", \"%c\", \"%c\", \"%c\", \"%c\", \"%c\"]}", parse_fault());
+        sprintf(th_buffer, "{\"data\":[\"%c\", \"%c\", \"%c\", \"%c\", \"%c\", \"%c\"]}", parse_fault());
     }
     else    {
-        sprintf(buffer, "{\"data\":[\"%c\",\"%c\"]}", max.readCJTemperature(), max.readThermocoupleTemperature());    
+        sprintf(th_buffer, "{\"data\":[\"%c\",\"%c\"]}", max.readCJTemperature(), max.readThermocoupleTemperature());    
     }
     Publish(buffer);
 }

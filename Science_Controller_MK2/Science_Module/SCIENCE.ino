@@ -16,11 +16,18 @@ const int DETECTOR_FEED = 5;
 const int EMITTER = 6;
 const int HOME_SWITCH_READ = 7;
 const int HOME_SWITCH_SEND = 8;
-const int DRILL_DOWN = 13;
-const int DRILL_UP = 14;
 const int SAMPLE_LOADING = 15;
 
+const int PROCESSOR_FREQUENCY = 16e6;
 const int TOTAL_STEPS  = 400;
+
+void wait() {
+    while(1) {
+        if("go") {
+            break;
+        }
+    }
+}
 
 void setup()    {
     Serial.begin(115200);
@@ -40,38 +47,65 @@ void setup()    {
     digitalWrite(EMITTER, LOW);
     digitalWrite(HOME_SWITCH_SEND, HIGH);
 
-    // Wait for ping from main cluster
-}
+    // Wait for ping from cluster
 
-void loop() {
-    // wait for "go" signal
-        // This means drill and carousel are home, spec is off
-    
-    while(digitalRead(HOME_SWITCH_READ) == FALSE)   {
-        sleep(0.5);
+    emitter_on();
+    for (int i; i <= 5*PROCESSOR_FREQUENCY; i++)    {
+        analyse_sample();
+        // need a way to store this data
     }
+    emitter_off();
 
     max.begin();
 
-    // send go to drill
+    char buffer[1024];
+    sprintf(buffer, "{\"science\":\"%i\"}", 1);
+    Publish(buffer);
+    wait()
+}
 
-    while("drill in ground")  {
+void loop() {
+    while(digitalRead(HOME_SWITCH_READ) == FALSE) {
+        sleep(0.5);
+    }
+
+    sprintf(char buffer[1024], "{\"go\":{\"%i\"]}", int 1);
+    Publish(buffer);
+
+    while("drill in ground") {
         read_temperature();
         read_moisture(analogRead(MOIST_SENSOR));
         delay(5);
     }
 
-    while ("drill not home")   {
+    while ("drill not home") {
         sleep(0.5);
     }
 
     // move carousel to sample deposit position
     // send sample position signal to drill
     // wait for drill deposit task
-    
-    
-    
+    // wait for go signal
 
+    emitter_on();
+    for (int i; i <= 5*PROCESSOR_FREQUENCY; i++)    {
+        analyse_sample();
+        // need a way to store this data
+    }
+    emitter_off();
+
+    // Wait for store sample signal
+
+    if ("store sample") {
+        wait();
+    }
+
+    // move carousel to empty position
+    // send empty position to drill
+    // wait for drill empty task
+    // wait for go signal
+
+    wait();
 }
 
 

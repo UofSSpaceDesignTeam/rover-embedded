@@ -1,11 +1,8 @@
 // Code to run spectrometer, and to relay data back to main computer cluster
 
-float buffer[1024];
-const float IRSensor = A2;
-const int emitter = 6;
+float spec_buffer[1024];
 
 void setup()    {
-    Serial.begin(115200);
     pinMode(emitter, OUTPUT);
     digitalWrite(emitter, LOW);
 }
@@ -26,12 +23,8 @@ void emitter_off()  {
 
 
 void analyse_sample() {
-    emitter_on();
     while("Spectrometer active")    {
-        sprintf(buffer, "{\"data\":[\"%i\"]}", detector());
+        sprintf(spec_buffer, "{\"data\":[\"%i\"]}", detector());
+        Publish(spec_buffer));
     } 
-    emitter_off();
-    while("wait")   {
-        spectrometer.wait();
-    }
 }

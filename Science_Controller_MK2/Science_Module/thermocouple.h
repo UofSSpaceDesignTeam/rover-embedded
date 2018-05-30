@@ -1,6 +1,6 @@
 // Code to read temperature data from thermocouple, and relay this data to the main computer cluster
 // Needs calibration
-
+#include "Robocluster.h"
 #include "Adafruit_MAX31856.h"
 
 Adafruit_MAX31856 max = Adafruit_MAX31856(9, 10, 11, 12);
@@ -74,5 +74,5 @@ void read_temperature() {
     else    {
         sprintf(th_buffer, "{\"data\":[\"%c\",\"%c\"]}", max.readCJTemperature(), max.readThermocoupleTemperature());    
     }
-    Publish(buffer);
+    Publish(th_buffer);
 }

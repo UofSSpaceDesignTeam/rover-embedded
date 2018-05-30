@@ -14,7 +14,6 @@ float moist(float dC)    {
 }
 
 void read_moisture(float Raw)    {
-        Raw = analogRead(moistsensor);
         dielectricConstant = dielectric_constant(Raw);
         sprintf(moist_buffer, "{\"data\":[\"%e\"]}", moist(dielectricConstant));  
         Publish(moist_buffer);

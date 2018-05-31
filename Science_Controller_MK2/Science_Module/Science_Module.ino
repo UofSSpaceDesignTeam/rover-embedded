@@ -2,7 +2,7 @@
 
 #include "Robocluster.h"
 #include "carousel.h"
-/* #include "thermocouple.h" */
+#include "thermocouple.h"
 #include "moisture_sensor.h"
 #include "spectrometer.h"
 //#include "carousel.h"
@@ -19,9 +19,6 @@
 #define HOME_SWITCH_SEND  8
 #define SAMPLE_LOADING  15
 
-#define PROCESSOR_FREQUENCY 16e6
-#define TOTAL_STEPS 400
-
 int g_start_science = 0;
 
 void enable_science(char *json_msg) {
@@ -35,6 +32,7 @@ void wait() {
     while(!g_start_science) {
         s_delay(100);
     }
+    g_start_science = 0;
 }
 
 void setup()    {
@@ -56,9 +54,10 @@ void setup()    {
     digitalWrite(EMITTER, LOW);
     digitalWrite(HOME_SWITCH_SEND, HIGH);
 
-    // Wait for ping from cluster
     set_name("ScienceArduino");
     set_message_handler(enable_science);
+
+    // home carousel
 
     emitter_on(EMITTER);
     int start_time = millis();
@@ -68,54 +67,85 @@ void setup()    {
     }
     emitter_off(EMITTER);
 
-    /* max.begin(); */
+    max.begin();
+
+    s_delay(100);
 
     char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"science\":\"%i\"}", 1);
+    sprintf(buffer, "{\"science_ready\":\"%i\"}", 1);
     Publish(buffer);
-    wait();
 }
 
-void loop() {
-    /* while(digitalRead(HOME_SWITCH_READ) == 0) { */
-    /*     s_delay(1); */
-    /* } */
+void loop() { 
     char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"go\":{\"%i\"]}", 1);
+    sprintf(buffer, "{\"take_sample\":\"%i\"}", 1);
+    Publish(buffer);   
+    wait();
+
+    while(1) {
+        s_delay(100);
+        read_temperature();
+        read_moisture(analogRead(MOIST_SENSOR));
+        if (g_start_science)    {
+            g_start_science = 0;
+            break;
+        }
+    }
+
+    wait();
+
+    char buffer[BUFF_SIZE];
+    sprintf(buffer, "{\"science_ready\":\"%i\"}", 0);
     Publish(buffer);
 
-    while("drill in ground") {
-        /* read_temperature(); */
-        read_moisture(analogRead(MOIST_SENSOR));
-        s_delay(100);
-    }
-
-    while ("drill not home") {
-        s_delay(0.5);
-    }
-
     // move carousel to sample deposit position
-    // send sample position signal to drill
-    // wait for drill deposit task
-    // wait for go signal
+
+    char buffer[BUFF_SIZE];
+    sprintf(buffer, "{\"carousel_position\":\"%c\"}", "sample");
+    Publish(buffer);
+    char buffer[BUFF_SIZE];
+    sprintf(buffer, "{\"science_ready\":\"%i\"}", 1);
+    Publish(buffer);
+    char buffer[BUFF_SIZE];
+    sprintf(buffer, "{\"deposit_sample\":\"%i\"}", 1);
+    Publish(buffer);
+    
+    wait();
+
+    char buffer[BUFF_SIZE];
+    sprintf(buffer, "{\"science_ready\":\"%i\"}", 0);
+    Publish(buffer);
+
+    // move carousel to sample analysis position
 
     emitter_on(EMITTER);
-    for (int i; i <= 5*PROCESSOR_FREQUENCY; i++)    {
+    int start_time = millis();
+    while (millis()-start_time < 500)    {
         analyse_sample();
         // need a way to store this data
     }
     emitter_off(EMITTER);
 
+    // there needs to be something here to push the data to the webui and to allow for human input of some sort, hopefully
     // Wait for store sample signal
 
     if ("store sample") {
+        // move carousel home
         wait();
     }
 
     // move carousel to empty position
-    // send empty position to drill
-    // wait for drill empty task
-    // wait for go signal
+
+    char buffer[BUFF_SIZE];
+    sprintf(buffer, "{\"carousel_position\":\"%c\"}", "empty");
+    Publish(buffer);
+    char buffer[BUFF_SIZE];
+    sprintf(buffer, "{\"empty_sample\":\"%i\"}", 1);
+    Publish(buffer);
+
+    wait();
+
+    // move carousel home
 
     wait();
 }

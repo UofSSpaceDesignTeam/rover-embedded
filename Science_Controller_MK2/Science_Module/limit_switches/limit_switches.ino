@@ -3,7 +3,7 @@
 #include "Robocluster.h"
 
   // Drill Stage 1 Top Switch
-  const int DRILL_1_TOP_SEND = 1;
+  #define DRILL_1_TOP_SEND 1;
   const int DRILL_1_TOP_READ = 2;
 
   // Drill Stage 1 Bottom Switch
@@ -26,7 +26,7 @@
   const int CAROUSEL_DUMP_SEND = 11;
   const int CAROUSEL_DUMP_READ = 12;
   
-  char buffer[1024];
+  char buffer[BUFF_SIZE];
 
 void setup() {
     Serial.begin(115000);
@@ -53,78 +53,59 @@ void setup() {
 
 char drill_1_top(){
     if (digitalRead(DRILL_1_TOP_READ) == HIGH){
-        return 'A';
+        return False;
     }
     else if (digitalRead(DRILL_1_TOP_READ) == LOW){
-        return 'H';
-    }
-    else{
-        return 'E';
+        return True;
     }
 }
 char drill_2_top(){
     if (digitalRead(DRILL_2_TOP_READ) == HIGH){
-        return 'A';
+        return False;
     }
     else if (digitalRead(DRILL_2_TOP_READ) == LOW){
-        return 'H';
-    }
-    else{
-        return 'E';
+        return True;
     }
 }
 
 char drill_1_bottom(){
     if (digitalRead(DRILL_1_BOTTOM_READ) == HIGH){
-        return 'A';
+        return False;
     }
     else if (digitalRead(DRILL_1_BOTTOM_READ) == LOW){
-        return 'H';
-    }
-    else{
-        return 'E';
+        return True;
     }
 }
 
 char drill_2_bottom(){
     if (digitalRead(DRILL_2_BOTTOM_READ) == HIGH){
-        return 'A';
+        return False;
     }
     else if (digitalRead(DRILL_2_BOTTOM_READ) == LOW){
-        return 'H';
-    }
-    else{
-        return 'E';
+        return True;
     }
 }
 
 char carousel_sample(){
     if (digitalRead(CAROUSEL_SAMPLE_READ) == HIGH){
-        return 'A';
+        return False;
     }
     else if (digitalRead(CAROUSEL_SAMPLE_READ) == LOW){
-        return 'H';
-    }
-    else{
-        return 'E';
+        return True;
     }
 }
 
 char carousel_dump(){
     if (digitalRead(CAROUSEL_DUMP_READ) == HIGH){
-        return 'A'; // away
+        return False; // away
     }
     else if (digitalRead(CAROUSEL_DUMP_READ) == LOW){
-        return 'H'; // here
-    }
-    else{
-        return 'E'; // error
+        return True; // here
     }
 }
 
-
 void loop() {
-    sprintf(buffer, "{\"data\":[\"%c\",\"%c\",\"%c\",\"%c\",\"%c\",\"%c\"]}", drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
+    sprintf(buffer, "{\"science_limit_switches\":[\"%c\",\"%c\",\"%c\",\"%c\",\"%c\",\"%c\"]}", drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
     //Serial.println(buffer);   // Used for debugging
     Publish(buffer);
     delay(10);

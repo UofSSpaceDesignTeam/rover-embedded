@@ -22,8 +22,8 @@
 int g_start_science = 0;
 
 void enable_science(char *json_msg) {
-    if (strcmp(json_msg, "{\"enable_science\": 1}") == 0) {
-        digitalWrite(13, HIGH);
+    char *expected = "{\"enable_science\": 1}";
+    if (strcmp(json_msg, expected) == 0) {
         g_start_science = 1;
     }
 }
@@ -72,13 +72,14 @@ void setup()    {
     s_delay(100);
 
     char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"science_ready\":\"%i\"}", 1);
+    sprintf(buffer, "{\"science_ready\":%i}", 1);
     Publish(buffer);
 }
 
 void loop() { 
+    wait();
     char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"take_sample\":\"%i\"}", 1);
+    sprintf(buffer, "{\"take_sample\":%i}", 1);
     Publish(buffer);   
     wait();
 
@@ -94,27 +95,27 @@ void loop() {
 
     wait();
 
-    char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"science_ready\":\"%i\"}", 0);
+    memset(buffer, 0, BUFF_SIZE);
+    sprintf(buffer, "{\"science_ready\":%i}", 0);
     Publish(buffer);
     s_delay(100);
     
     // move carousel to sample deposit position
 
-    char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"carousel_position\":\"%c\"}", "sample");
+    memset(buffer, 0, BUFF_SIZE);
+    sprintf(buffer, "{\"carousel_position\":\"%s\"}", "sample");
     Publish(buffer);
-    char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"science_ready\":\"%i\"}", 1);
+    memset(buffer, 0, BUFF_SIZE);
+    sprintf(buffer, "{\"science_ready\":%i}", 1);
     Publish(buffer);
-    char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"deposit_sample\":\"%i\"}", 1);
+    memset(buffer, 0, BUFF_SIZE);
+    sprintf(buffer, "{\"deposit_sample\":%i}", 1);
     Publish(buffer);
     
     wait();
 
-    char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"science_ready\":\"%i\"}", 0);
+    memset(buffer, 0, BUFF_SIZE);
+    sprintf(buffer, "{\"science_ready\":%i}", 0);
     Publish(buffer);
 
     // move carousel to sample analysis position
@@ -137,11 +138,11 @@ void loop() {
 
     // move carousel to empty position
 
-    char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"carousel_position\":\"%c\"}", "empty");
+    memset(buffer, 0, BUFF_SIZE);
+    sprintf(buffer, "{\"carousel_position\":\"%s\"}", "empty");
     Publish(buffer);
-    char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"empty_sample\":\"%i\"}", 1);
+    memset(buffer, 0, BUFF_SIZE);
+    sprintf(buffer, "{\"empty_sample\":%i}", 1);
     Publish(buffer);
 
     wait();

@@ -53,56 +53,57 @@ void setup() {
 
 bool drill_1_top(){
     if (digitalRead(DRILL_1_TOP_READ) == HIGH){
-        return False;
+        return false;
     }
     else if (digitalRead(DRILL_1_TOP_READ) == LOW){
-        return True;
+        return true;
     }
 }
 bool drill_2_top(){
     if (digitalRead(DRILL_2_TOP_READ) == HIGH){
-        return False;
+        return false;
     }
     else if (digitalRead(DRILL_2_TOP_READ) == LOW){
-        return True;
+        return true;
     }
 }
 bool drill_1_bottom(){
     if (digitalRead(DRILL_1_BOTTOM_READ) == HIGH){
-        return False;
+        return false;
     }
     else if (digitalRead(DRILL_1_BOTTOM_READ) == LOW){
-        return True;
+        return true;
     }
 }
 bool drill_2_bottom(){
     if (digitalRead(DRILL_2_BOTTOM_READ) == HIGH){
-        return False;
+        return false;
     }
     else if (digitalRead(DRILL_2_BOTTOM_READ) == LOW){
-        return True;
+        return true;
     }
 }
 bool carousel_sample(){
     if (digitalRead(CAROUSEL_SAMPLE_READ) == HIGH){
-        return False;
+        return false;
     }
     else if (digitalRead(CAROUSEL_SAMPLE_READ) == LOW){
-        return True;
+        return true;
     }
 }
 bool carousel_dump(){
     if (digitalRead(CAROUSEL_DUMP_READ) == HIGH){
-        return False; // away
+        return false; // away
     }
     else if (digitalRead(CAROUSEL_DUMP_READ) == LOW){
-        return True; // here
+        return true; // here
     }
 }
 
 void loop() {
-    sprintf(buffer, "{\"science_limit_switches\":[\"%i\",\"%i\",\"%i\",\"%i\",\"%i\",\"%i\"]}", drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
-    Serial.println(buffer);   // Used for debugging
+    memset(buffer, 0, BUFF_SIZE);
+    sprintf(buffer, "{\"science_limit_switches\":[%i,%i,%i,%i,%i,%i]}", drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
+    Publish(buffer);   // Used for debugging
     //Publish(buffer);
-    delay(10);
+    delay(200);
 }

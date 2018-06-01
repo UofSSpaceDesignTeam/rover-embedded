@@ -1,7 +1,6 @@
 // Code to run carousel and relay data to main computer
 
 #include "Robocluster.h"
-#include "VESCPacket.h"
 
 char car_buffer[BUFF_SIZE];
 #define full_rotation 400 // steps

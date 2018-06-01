@@ -19,6 +19,6 @@ void emitter_off(int emitter)  {
 
 
 void analyse_sample() {
-    sprintf(spec_buffer, "{\"spectrometer_data\":\"%f\"}", detector(A2));
+    sprintf(spec_buffer, "{\"spectrometer_data\":%f}", detector(A2));
     Publish(spec_buffer);
 }

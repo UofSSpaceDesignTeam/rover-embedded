@@ -70,11 +70,12 @@ char* parse_fault()  {
 void read_temperature() {
     if (max.readFault()) {
         // Won't work properly right now 
-        sprintf(th_buffer, "{\"thermocouple_error\":[\"%c\", \"%c\", \"%c\", \"%c\", \"%c\", \"%c\"]}", parse_fault());
+        // sprintf(th_buffer, "{\"thermocouple_error\":[\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\"]}", parse_fault());
     }
     else    {
-        sprintf(th_buffer, "{\"thermocouple_data\":[\"%c\",\"%c\"]}", max.readCJTemperature(), max.readThermocoupleTemperature());    
+        memset(th_buffer, 0, BUFF_SIZE);
+        sprintf(th_buffer, "{\"thermocouple_data\":[\"%s\",\"%s\"]}", max.readCJTemperature(), max.readThermocoupleTemperature());    
+        Publish(th_buffer);
     }
-    Publish(th_buffer);
     s_delay(1000);
 }

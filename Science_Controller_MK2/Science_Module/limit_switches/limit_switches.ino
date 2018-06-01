@@ -3,28 +3,28 @@
 #include "Robocluster.h"
 
   // Drill Stage 1 Top Switch
-  #define DRILL_1_TOP_SEND 1;
-  const int DRILL_1_TOP_READ = 2;
+  #define DRILL_1_TOP_SEND 1
+  #define DRILL_1_TOP_READ 2
 
   // Drill Stage 1 Bottom Switch
-  const int DRILL_1_BOTTOM_SEND = 3;
-  const int DRILL_1_BOTTOM_READ = 4;
+  #define DRILL_1_BOTTOM_SEND 3
+  #define DRILL_1_BOTTOM_READ 4
 
   // Drill Stage 2 Top Switch
-  const int DRILL_2_TOP_SEND = 5;
-  const int DRILL_2_TOP_READ = 6;
+  #define DRILL_2_TOP_SEND 5
+  #define DRILL_2_TOP_READ 6
 
   // Drill Stage 2 Bottom Switch
-  const int DRILL_2_BOTTOM_SEND = 7;
-  const int DRILL_2_BOTTOM_READ = 8;
+  #define DRILL_2_BOTTOM_SEND 7
+  #define DRILL_2_BOTTOM_READ 8
 
   // Carousel Sample Holder Switch
-  const int CAROUSEL_SAMPLE_SEND = 9;
-  const int CAROUSEL_SAMPLE_READ = 10;
+  #define CAROUSEL_SAMPLE_SEND 9
+  #define CAROUSEL_SAMPLE_READ 10
 
   // Carousel Sample Dump Switch
-  const int CAROUSEL_DUMP_SEND = 11;
-  const int CAROUSEL_DUMP_READ = 12;
+  #define CAROUSEL_DUMP_SEND 11
+  #define CAROUSEL_DUMP_READ 12
   
   char buffer[BUFF_SIZE];
 
@@ -51,7 +51,7 @@ void setup() {
     digitalWrite(CAROUSEL_DUMP_SEND, HIGH);
 }
 
-char drill_1_top(){
+bool drill_1_top(){
     if (digitalRead(DRILL_1_TOP_READ) == HIGH){
         return False;
     }
@@ -59,7 +59,7 @@ char drill_1_top(){
         return True;
     }
 }
-char drill_2_top(){
+bool drill_2_top(){
     if (digitalRead(DRILL_2_TOP_READ) == HIGH){
         return False;
     }
@@ -67,8 +67,7 @@ char drill_2_top(){
         return True;
     }
 }
-
-char drill_1_bottom(){
+bool drill_1_bottom(){
     if (digitalRead(DRILL_1_BOTTOM_READ) == HIGH){
         return False;
     }
@@ -76,8 +75,7 @@ char drill_1_bottom(){
         return True;
     }
 }
-
-char drill_2_bottom(){
+bool drill_2_bottom(){
     if (digitalRead(DRILL_2_BOTTOM_READ) == HIGH){
         return False;
     }
@@ -85,8 +83,7 @@ char drill_2_bottom(){
         return True;
     }
 }
-
-char carousel_sample(){
+bool carousel_sample(){
     if (digitalRead(CAROUSEL_SAMPLE_READ) == HIGH){
         return False;
     }
@@ -94,8 +91,7 @@ char carousel_sample(){
         return True;
     }
 }
-
-char carousel_dump(){
+bool carousel_dump(){
     if (digitalRead(CAROUSEL_DUMP_READ) == HIGH){
         return False; // away
     }
@@ -105,8 +101,8 @@ char carousel_dump(){
 }
 
 void loop() {
-    sprintf(buffer, "{\"science_limit_switches\":[\"%c\",\"%c\",\"%c\",\"%c\",\"%c\",\"%c\"]}", drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
-    //Serial.println(buffer);   // Used for debugging
-    Publish(buffer);
+    sprintf(buffer, "{\"science_limit_switches\":[\"%i\",\"%i\",\"%i\",\"%i\",\"%i\",\"%i\"]}", drill_1_top(), drill_1_bottom(), drill_2_top(), drill_2_bottom(), carousel_sample(), carousel_dump());
+    Serial.println(buffer);   // Used for debugging
+    //Publish(buffer);
     delay(10);
 }

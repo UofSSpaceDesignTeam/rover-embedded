@@ -97,7 +97,8 @@ void loop() {
     char buffer[BUFF_SIZE];
     sprintf(buffer, "{\"science_ready\":\"%i\"}", 0);
     Publish(buffer);
-
+    s_delay(100);
+    
     // move carousel to sample deposit position
 
     char buffer[BUFF_SIZE];

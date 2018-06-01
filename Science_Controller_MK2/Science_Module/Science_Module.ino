@@ -19,7 +19,7 @@
 #define HOME_SWITCH_SEND  8
 #define SAMPLE_LOADING  15
 
-int g_start_science = 0;
+int g_start_science = 1;
 
 void enable_science(char *json_msg) {
     char *expected = "{\"enable_science\": 1}";
@@ -32,7 +32,7 @@ void wait() {
     while(!g_start_science) {
         s_delay(100);
     }
-    g_start_science = 0;
+    /* g_start_science = 0; */
 }
 
 void setup()    {

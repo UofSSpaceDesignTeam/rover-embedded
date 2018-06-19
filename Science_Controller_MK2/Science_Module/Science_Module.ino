@@ -2,7 +2,7 @@
 
 #include "Robocluster.h"
 #include "carousel.h"
-#include "thermocouple.h"
+//#include "thermocouple.h"
 #include "moisture_sensor.h"
 #include "spectrometer.h"
 //#include "carousel.h"
@@ -67,7 +67,7 @@ void setup()    {
     }
     emitter_off(EMITTER);
 
-    max.begin();
+    //max.begin();
 
     s_delay(100);
 
@@ -80,12 +80,13 @@ void loop() {
     wait();
     char buffer[BUFF_SIZE];
     sprintf(buffer, "{\"take_sample\":%i}", 1);
+    Serial.print(buffer);
     Publish(buffer);   
     wait();
 
     while(1) {
         s_delay(100);
-        read_temperature();
+        //read_temperature();
         read_moisture(analogRead(MOIST_SENSOR));
         if (g_start_science)    {
             g_start_science = 0;

@@ -5,6 +5,7 @@
 #include "Robocluster.h"
 
 Adafruit_MAX31856 max = Adafruit_MAX31856(9, 10, 11, 12);
+max.begin();
 
 char th_buffer[BUFF_SIZE];
 

@@ -1,7 +1,7 @@
 #ifndef ROBOCLUSTER
 #define ROBOCLUSTER
 
-#define BUFF_SIZE 512
+#define BUFF_SIZE 128
 
 void dummy_handler(char*) {
     // This does nothing, but you can define your own
@@ -12,7 +12,7 @@ char *DEVICE_NAME = "TestName";
 void (*g_message_handler)(char*) = dummy_handler;
 
 
-void serialEvent() {
+void testserialEvent() {
     //digitalWrite(13, HIGH);
     char buff[BUFF_SIZE];
     memset(buff, 0, BUFF_SIZE);
@@ -46,7 +46,7 @@ void Publish(char *message) {
 
 void s_delay(int value) {
     if (Serial.available()) {
-        serialEvent();
+        testserialEvent();
     }
     delay(value);
 

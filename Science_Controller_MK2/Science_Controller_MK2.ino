@@ -1,4 +1,5 @@
-#include <Adafruit_MAX31856.h>
+#include "Adafruit_MAX31856.h"
+#include "Robocluster.h"
 
 // Defining pins
 const float sensor = A1;
@@ -22,11 +23,6 @@ const int drillDown = 13;
 const int drillUP = 14; // LG - check if this means drill home. Should maybe have extra checks in case of false positive
 const int sampleLoading = 15;
 
-// Other Stuff
-int i; // iteration variable
-/*
-  LG - iteration variables should be local, use flags to work globally. Too many possible issues with global counter
-*/ 
 const int TotalSteps = 400; // Steps for one full rotation 
 
 // Sets Pins and Sets everything so that initially nothing happens
@@ -49,9 +45,9 @@ void setup() {
 // Runs the Carousel, choose direction, speed, # of steps
 /*
   LG - should choose a set speed and never change it
-     - should also only move in one direction, way easier to keep track of where the motor is, and that way we only have to know how many steps   we want
 */
-void runCarousel(boolean direction, double speed, int stepCount){
+void runCarousel(bool direction, double speed, int stepCount){
+  int i;
   digitalWrite(carouselDirection, direction);
   digitalWrite(carouselMotor, HIGH);
   for (int i = 0; i < stepCount; i++){
@@ -97,13 +93,15 @@ void zeroer(){
 
 // Thermocouple
 void thermocouple(){
-  Serial.print("Cold Junction Temp: "); Serial.println(max.readCJTemperature());
+  Serial.print("Cold Junction Temp: "); 
+  Serial.println(max.readCJTemperature());
   //Serial.println(max.readThermocoupleTemperature()); // It always wants to print out 0 before itll print out the temp so this just does that instead of having the "cold junction temp: " bit equal to 0 which is more confusing
 /*
   LG - probably a different way around this. Low priority fix
      - below should be its own method when rewritten as class
 */
-  Serial.print("Thermocouple Temp: "); Serial.println(max.readThermocoupleTemperature());
+  Serial.print("Thermocouple Temp: "); 
+  Serial.println(max.readThermocoupleTemperature());
   // Check and print any faults
   uint8_t fault = max.readFault();
   if (fault) {
@@ -118,6 +116,8 @@ void thermocouple(){
   }
   delay(1000);
 }
+
+
 
 // Moisture Sensor
 /*
@@ -136,7 +136,8 @@ void moistureSensor(){
   // relates dielectric constant and moisture content
   float moisture = dielectricConstant/80 - 0.26/(dielectricConstant - 1) + 0.11+0.48; //units g/cm^3
   
-  Serial.print("Soil Moisture Content (g/cm^3): "); Serial.println(moisture);
+  Serial.print("Soil Moisture Content (g/cm^3): "); 
+  Serial.println(moisture);
 }
 
 
@@ -147,7 +148,8 @@ void moistureSensor(){
 */
 void detectorLoop(){
   for (i = 0; i < 100; i++){
-    Serial.print("Infrared Intensity: "); Serial.println(sensor);
+    Serial.print("Infrared Intensity: "); 
+    Serial.println(sensor);
     delay(100);
   }
 }

@@ -5,7 +5,7 @@
 //#include "thermocouple.h"
 #include "moisture_sensor.h"
 #include "spectrometer.h"
-//#include "carousel.h"
+#include "carousel.h"
 
 // Define Arduino Pins
 #define IR_SENSOR  A2
@@ -57,7 +57,7 @@ void setup()    {
     set_name("ScienceArduino");
     set_message_handler(enable_science);
 
-    // home carousel
+    carousel_init(CAROUSEL_MOTOR, CAROUSEL_DIRECTION);
 
     emitter_on(EMITTER);
     int start_time = millis();
@@ -101,7 +101,9 @@ void loop() {
     Publish(buffer);
     s_delay(100);
     
-    // move carousel to sample deposit position
+    for(int steps = 0; steps <= "sample steps", steps++)   {
+        step_motor("direction", CAROUSEL_DIRECTION, CAROUSEL_MOTOR);
+    };
 
     memset(buffer, 0, BUFF_SIZE);
     sprintf(buffer, "{\"carousel_position\":\"%s\"}", "sample");
@@ -119,7 +121,9 @@ void loop() {
     sprintf(buffer, "{\"science_ready\":%i}", 0);
     Publish(buffer);
 
-    // move carousel to sample analysis position
+    for(steps; steps <= "analysis steps", steps++)   {
+        step_motor("direction", CAROUSEL_DIRECTION, CAROUSEL_MOTOR);
+    };
 
     emitter_on(EMITTER);
     int start_time = millis();
@@ -133,11 +137,15 @@ void loop() {
     // Wait for store sample signal
 
     if ("store sample") {
-        // move carousel home
+        while("home switch false")  {
+            step_motor("ccw", direction_pin, step_pin);
+        }
         wait();
     }
 
-    // move carousel to empty position
+    for(steps; steps <= "empty steps", steps++)   {
+        step_motor("direction", CAROUSEL_DIRECTION, CAROUSEL_MOTOR);
+    };
 
     memset(buffer, 0, BUFF_SIZE);
     sprintf(buffer, "{\"carousel_position\":\"%s\"}", "empty");
@@ -148,7 +156,9 @@ void loop() {
 
     wait();
 
-    // move carousel home
+    while("home switch false")  {
+        step_motor("ccw", direction_pin, step_pin);
+    }
 
     wait();
 }

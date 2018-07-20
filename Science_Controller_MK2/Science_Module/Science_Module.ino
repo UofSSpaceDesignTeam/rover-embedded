@@ -8,16 +8,12 @@
 #include "carousel.h"
 
 // Define Arduino Pins
-#define IR_SENSOR  A2
-#define MOIST_SENSOR  A3
-#define CAROUSEL_MOTOR  2
-#define CAROUSEL_DIRECTION  3
-#define CAROUSEL_STEP  4
-#define DETECTOR_FEED  5
-#define EMITTER  6
-#define HOME_SWITCH_READ  7
-#define HOME_SWITCH_SEND  8
-#define SAMPLE_LOADING  15
+#define IR_SENSOR  A1
+#define MOIST_SENSOR  A2
+#define CAROUSEL_DIRECTION  6
+#define CAROUSEL_STEP  7
+#define DETECTOR_FEED  8
+#define EMITTER  5
 
 int g_start_science = 1;
 
@@ -28,36 +24,32 @@ void enable_science(char *json_msg) {
     }
 }
 
+/*
 void wait() {
     while(!g_start_science) {
         s_delay(100);
     }
-    /* g_start_science = 0; */
 }
+*/
 
 void setup()    {
     Serial.begin(115200);
 
     // Set pin I/O
     pinMode(EMITTER, OUTPUT);
-    pinMode(CAROUSEL_MOTOR, OUTPUT);
     pinMode(CAROUSEL_STEP, OUTPUT);
     pinMode(CAROUSEL_DIRECTION, OUTPUT);
-    pinMode(HOME_SWITCH_SEND, OUTPUT);
-    pinMode(HOME_SWITCH_READ, INPUT);
     pinMode(13, OUTPUT);
 
     // Initialize send pins and ensure that nothing happens during initialization
     digitalWrite(CAROUSEL_STEP, LOW);
     digitalWrite(CAROUSEL_DIRECTION, LOW);
-    digitalWrite(CAROUSEL_MOTOR, LOW);
     digitalWrite(EMITTER, LOW);
-    digitalWrite(HOME_SWITCH_SEND, HIGH);
 
     set_name("ScienceArduino");
     set_message_handler(enable_science);
 
-    carousel_init(CAROUSEL_MOTOR, CAROUSEL_DIRECTION);
+    carousel_init(CAROUSEL_STEP, CAROUSEL_DIRECTION);
 
     emitter_on(EMITTER);
     int start_time = millis();
@@ -77,90 +69,7 @@ void setup()    {
 }
 
 void loop() { 
-    wait();
-    char buffer[BUFF_SIZE];
-    sprintf(buffer, "{\"take_sample\":%i}", 1);
-    Serial.print(buffer);
-    Publish(buffer);   
-    wait();
 
-    while(1) {
-        s_delay(100);
-        //read_temperature();
-        read_moisture(analogRead(MOIST_SENSOR));
-        if (g_start_science)    {
-            g_start_science = 0;
-            break;
-        }
-    }
-
-    wait();
-
-    memset(buffer, 0, BUFF_SIZE);
-    sprintf(buffer, "{\"science_ready\":%i}", 0);
-    Publish(buffer);
-    s_delay(100);
-    
-    for(int steps = 0; steps <= "sample steps", steps++)   {
-        step_motor("direction", CAROUSEL_DIRECTION, CAROUSEL_MOTOR);
-    };
-
-    memset(buffer, 0, BUFF_SIZE);
-    sprintf(buffer, "{\"carousel_position\":\"%s\"}", "sample");
-    Publish(buffer);
-    memset(buffer, 0, BUFF_SIZE);
-    sprintf(buffer, "{\"science_ready\":%i}", 1);
-    Publish(buffer);
-    memset(buffer, 0, BUFF_SIZE);
-    sprintf(buffer, "{\"deposit_sample\":%i}", 1);
-    Publish(buffer);
-    
-    wait();
-
-    memset(buffer, 0, BUFF_SIZE);
-    sprintf(buffer, "{\"science_ready\":%i}", 0);
-    Publish(buffer);
-
-    for(steps; steps <= "analysis steps", steps++)   {
-        step_motor("direction", CAROUSEL_DIRECTION, CAROUSEL_MOTOR);
-    };
-
-    emitter_on(EMITTER);
-    int start_time = millis();
-    while (millis()-start_time < 500)    {
-        analyse_sample();
-        // need a way to store this data
-    }
-    emitter_off(EMITTER);
-
-    // there needs to be something here to push the data to the webui and to allow for human input of some sort, hopefully
-    // Wait for store sample signal
-
-    if ("store sample") {
-        while("home switch false")  {
-            step_motor("ccw", direction_pin, step_pin);
-        }
-        wait();
-    }
-
-    for(steps; steps <= "empty steps", steps++)   {
-        step_motor("direction", CAROUSEL_DIRECTION, CAROUSEL_MOTOR);
-    };
-
-    memset(buffer, 0, BUFF_SIZE);
-    sprintf(buffer, "{\"carousel_position\":\"%s\"}", "empty");
-    Publish(buffer);
-    memset(buffer, 0, BUFF_SIZE);
-    sprintf(buffer, "{\"empty_sample\":%i}", 1);
-    Publish(buffer);
-
-    wait();
-
-    while("home switch false")  {
-        step_motor("ccw", direction_pin, step_pin);
-    }
-
-    wait();
 }
 
 

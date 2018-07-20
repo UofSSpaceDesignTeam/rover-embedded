@@ -13,9 +13,8 @@ void step_motor(int direction, int direction_pin, int step_pin)    {
 }
 
 void carousel_init(int step_pin, int direction_pin)    {
-    digitalWrite(motor_arduino_pin, HIGH);
     while("home switch false")  {
-        step_motor("ccw", direction_pin, step_pin);
+        step_motor(-1, direction_pin, step_pin);
     }
 
 }

@@ -1,5 +1,5 @@
-#include "Adafruit_MAX31856.h"
-#include "Robocluster.h"
+#include "Science_Module/Adafruit_MAX31856.h"
+#include "Science_Module/Robocluster.h"
 
 // Defining pins
 const float sensor = A1;

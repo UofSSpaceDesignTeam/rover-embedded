@@ -1,23 +1,33 @@
 #include "Robocluster.h"
 
-void blink(char *json_msg) {
-    char *expected = "{\"test\": 42}";
-    if (strcmp(json_msg, expected) == 0) {
-        digitalWrite(13, HIGH);
+void blink(char *data) {
+    char *expected = "42";
+    if (strcmp(data, expected) == 0) {
+        Publish(data);
     }
-    Publish(json_msg);
 }
+
+void dynamic_delay(char *data) {
+    int dt = atoi(data);
+    Publish(data);
+    digitalWrite(13, HIGH);
+    delay(dt);
+    digitalWrite(13, LOW);
+}
+
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   pinMode(13, OUTPUT); //LED will blink when message received
   set_name("ExampleDevice");
-  set_message_handler(blink);
+  int n_msgs = 2; // REMEMBER TO SET THIS TO THE RIGHT NUMBER OF MESSAGES :)
+  set_messages(n_msgs, "test", "delay");
+  set_callbacks(n_msgs, blink, dynamic_delay);
 }
 
 void loop() {
   delay(1000);
-  Publish("{\"test\":1234}");
+  /* Publish("{\"test\":1234}"); */
 
 }

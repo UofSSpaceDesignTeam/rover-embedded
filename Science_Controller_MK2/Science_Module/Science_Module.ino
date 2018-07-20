@@ -1,8 +1,8 @@
 // Code to run and read data from science module instruments, including carousel, spectrometer, thermocouple, and moisture sensor
 
 #include "Robocluster.h"
-#include "carousel.h"
-//#include "thermocouple.h"
+//#include "carousel.h"
+#include "thermocouple.h"
 #include "moisture_sensor.h"
 #include "spectrometer.h"
 #include "carousel.h"
@@ -15,22 +15,39 @@
 #define DETECTOR_FEED  8
 #define EMITTER  5
 
-int g_start_science = 1;
+//TODO: discuss order of tasks
+//      one single command to analyse sample or one command per step
 
-void enable_science(char *json_msg) {
-    char *expected = "{\"enable_science\": 1}";
-    if (strcmp(json_msg, expected) == 0) {
-        g_start_science = 1;
-    }
-}
+void move_carousel(char *data)  {
+    int steps = atoi(data);
+};
 
-/*
-void wait() {
-    while(!g_start_science) {
-        s_delay(100);
-    }
-}
-*/
+void run_thermocouple(char *data)   {
+    int t = atoi(data);
+    int start = millis();
+    while(millis() - start < data)  {
+        read_temperature();
+    };
+};
+
+void run_moisture_probe(char *data)  {
+    int t = atoi(data);
+    int start = millis();
+    while(millis() - start < data)  {
+        read_moisture(MOIST_SENSOR)
+    };
+};
+
+void run_emitter(char *data)  {
+    if(data == "enable")  {
+        emitter_on(EMITTER);
+    };
+
+    else if(data == "disable")  {
+        emitter_off(EMITTER);
+    };
+};
+
 
 void setup()    {
     Serial.begin(115200);

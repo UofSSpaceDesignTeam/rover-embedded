@@ -4,63 +4,62 @@
 #include "Adafruit_MAX31856.h"
 #include "Robocluster.h"
 
-Adafruit_MAX31856 max = Adafruit_MAX31856(9, 10, 11, 12);
-max.begin();
+Adafruit_MAX31856 a_max = Adafruit_MAX31856(9, 10, 11, 12);
 
 char th_buffer[BUFF_SIZE];
 
 // This isn't going to work properly right now
 char* parse_fault()  {
-        if (max.readFault() & MAX31856_FAULT_CJRANGE)   {
+        if (a_max.readFault() & MAX31856_FAULT_CJRANGE)   {
             return("Cold Junction Range Fault");
         }
         else    {
             return(" ");
         }
 
-        if (max.readFault() & MAX31856_FAULT_TCRANGE)   {
+        if (a_max.readFault() & MAX31856_FAULT_TCRANGE)   {
             return("Thermocouple Range Fault");
         }
         else    {
             return(" ");
         }
 
-        if (max.readFault() & MAX31856_FAULT_CJHIGH)    {
+        if (a_max.readFault() & MAX31856_FAULT_CJHIGH)    {
             return("Cold Junction High Fault");
         }
         else    {
             return(" ");
         }
 
-        if (max.readFault() & MAX31856_FAULT_CJLOW) {
+        if (a_max.readFault() & MAX31856_FAULT_CJLOW) {
             return("Cold Junction Low Fault");
         }
         else    {
             return(" ");
         }
 
-        if (max.readFault() & MAX31856_FAULT_TCHIGH)    {
+        if (a_max.readFault() & MAX31856_FAULT_TCHIGH)    {
             return("Thermocouple High Fault");
         }
         else    {
             return(" ");
         }
 
-        if (max.readFault() & MAX31856_FAULT_TCLOW) {
+        if (a_max.readFault() & MAX31856_FAULT_TCLOW) {
             return("Thermocouple Low Fault");
         }
         else    {
             return(" ");
         }
 
-        if (max.readFault() & MAX31856_FAULT_OVUV)  {
+        if (a_max.readFault() & MAX31856_FAULT_OVUV)  {
             return("Over/Under Voltage Fault");
         }
         else    {
             return(" ");
         }
 
-        if (max.readFault() & MAX31856_FAULT_OPEN)  {
+        if (a_max.readFault() & MAX31856_FAULT_OPEN)  {
             return("Thermocouple Open Fault");
         }
         else    {
@@ -69,14 +68,13 @@ char* parse_fault()  {
 }
 
 void read_temperature() {
-    if (max.readFault()) {
+    if (a_max.readFault()) {
         // Won't work properly right now 
         // sprintf(th_buffer, "{\"thermocouple_error\":[\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\"]}", parse_fault());
     }
     else    {
         memset(th_buffer, 0, BUFF_SIZE);
-        sprintf(th_buffer, "{\"thermocouple_data\":[\"%s\",\"%s\"]}", max.readCJTemperature(), max.readThermocoupleTemperature());    
+        sprintf(th_buffer, "{\"thermocouple_data\":[\"%s\",\"%s\"]}", a_max.readCJTemperature(), a_max.readThermocoupleTemperature());    
         Publish(th_buffer);
     }
-    s_delay(1000);
 }

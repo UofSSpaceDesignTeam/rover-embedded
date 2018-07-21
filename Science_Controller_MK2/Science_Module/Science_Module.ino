@@ -20,37 +20,30 @@
 
 void move_carousel(char *data)  {
     int steps = atoi(data);
-};
+}
 
 void run_thermocouple(char *data)   {
-    int t = atoi(data);
-    int start = millis();
-    while(millis() - start < data)  {
-        read_temperature();
-    };
-};
+    read_temperature();
+}
 
 void run_moisture_probe(char *data)  {
-    int t = atoi(data);
-    int start = millis();
-    while(millis() - start < data)  {
-        read_moisture(MOIST_SENSOR)
-    };
-};
+    read_moisture(MOIST_SENSOR);
+}
 
 void run_emitter(char *data)  {
     if(data == "enable")  {
         emitter_on(EMITTER);
-    };
+    }
 
     else if(data == "disable")  {
         emitter_off(EMITTER);
-    };
-};
+    }
+}
 
 
 void setup()    {
     Serial.begin(115200);
+    a_max.begin();
 
     // Set pin I/O
     pinMode(EMITTER, OUTPUT);
@@ -64,8 +57,10 @@ void setup()    {
     digitalWrite(EMITTER, LOW);
 
     set_name("ScienceArduino");
-    set_message_handler(enable_science);
-
+    int num_msgs = 4;
+    set_messages(num_msgs, "move_carousel", "run_thermocouple",       "run_moisture_probe", "run_emitter");
+    set_callbacks(num_msgs, move_carousel, run_thermocouple,
+    run_moisture_probe, run_emitter);
     carousel_init(CAROUSEL_STEP, CAROUSEL_DIRECTION);
 
     emitter_on(EMITTER);

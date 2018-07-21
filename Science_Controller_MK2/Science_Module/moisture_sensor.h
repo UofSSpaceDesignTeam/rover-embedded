@@ -18,5 +18,4 @@ void read_moisture(float Raw)    {
         float dielectricConstant = dielectric_constant(Raw);
         sprintf(moist_buffer, "{\"moisture_data\":\"%f\"}", moist(dielectricConstant));  
         Publish(moist_buffer);
-        s_delay(1000);
 }

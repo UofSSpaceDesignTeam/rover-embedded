@@ -20,6 +20,9 @@
 
 void move_carousel(char *data)  {
     int steps = atoi(data);
+    for(int i=0; i<steps; i++) {
+        step_motor(1, CAROUSEL_DIRECTION, CAROUSEL_STEP);
+    }
 }
 
 void run_thermocouple(char *data)   {
@@ -31,13 +34,18 @@ void run_moisture_probe(char *data)  {
 }
 
 void run_emitter(char *data)  {
-    if(data == "enable")  {
+    int d = atoi(data);
+    if(d == 1) {
         emitter_on(EMITTER);
+        digitalWrite(13, HIGH);
     }
-
-    else if(data == "disable")  {
+    else if(d == 0)  {
         emitter_off(EMITTER);
     }
+}
+
+void take_reading(char *data) {
+    analyse_sample();
 }
 
 
@@ -54,34 +62,35 @@ void setup()    {
     // Initialize send pins and ensure that nothing happens during initialization
     digitalWrite(CAROUSEL_STEP, LOW);
     digitalWrite(CAROUSEL_DIRECTION, LOW);
-    digitalWrite(EMITTER, LOW);
+    digitalWrite(EMITTER,HIGH);
 
     set_name("ScienceArduino");
-    int num_msgs = 4;
-    set_messages(num_msgs, "move_carousel", "run_thermocouple",       "run_moisture_probe", "run_emitter");
+    int num_msgs = 5;
+    set_messages(num_msgs, "move_carousel", "run_thermocouple",       "run_moisture_probe", "run_emitter", "detector");
     set_callbacks(num_msgs, move_carousel, run_thermocouple,
-    run_moisture_probe, run_emitter);
-    carousel_init(CAROUSEL_STEP, CAROUSEL_DIRECTION);
+    run_moisture_probe, run_emitter, take_reading);
+    /* carousel_init(CAROUSEL_STEP, CAROUSEL_DIRECTION); */
 
-    emitter_on(EMITTER);
-    int start_time = millis();
-    while (millis()-start_time < 500)    {
-        analyse_sample();
-        // need a way to store this data
-    }
-    emitter_off(EMITTER);
-
-    //max.begin();
-
-    s_delay(100);
-
+    /* emitter_on(EMITTER); */
+    /* int start_time = millis(); */
+    /* while (millis()-start_time < 500)    { */
+    /*     analyse_sample(); */
+    /*     // need a way to store this data */
+    /* } */
+    /* emitter_off(EMITTER); */
+    /*  */
+    /* //max.begin(); */
+    /*  */
+    /* s_delay(100); */
+    /*  */
     char buffer[BUFF_SIZE];
     sprintf(buffer, "{\"science_ready\":%i}", 1);
     Publish(buffer);
 }
 
 void loop() { 
-
+    delay(1000);
+    digitalWrite(13, LOW);
 }
 
 

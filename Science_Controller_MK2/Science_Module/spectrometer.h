@@ -9,16 +9,16 @@ float detector(int IRSensor)  {
 }
 
 void emitter_on(int emitter)  {
-    digitalWrite(emitter, HIGH);
+    digitalWrite(emitter, LOW);
     // Check if this is right
 }
 
 void emitter_off(int emitter)  {
-    digitalWrite(emitter, LOW);
+    digitalWrite(emitter, HIGH);
 }
 
 
 void analyse_sample() {
-    sprintf(spec_buffer, "{\"spectrometer_data\":%f}", detector(A2));
+    sprintf(spec_buffer, "{\"spectrometer_data\":%f}", detector(A1));
     Publish(spec_buffer);
 }

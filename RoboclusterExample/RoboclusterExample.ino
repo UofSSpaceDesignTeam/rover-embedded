@@ -2,14 +2,13 @@
 
 void blink(char *data) {
     char *expected = "42";
+    Publish(data);
     if (strcmp(data, expected) == 0) {
-        Publish(data);
     }
 }
 
 void dynamic_delay(char *data) {
     int dt = atoi(data);
-    Publish(data);
     digitalWrite(13, HIGH);
     delay(dt);
     digitalWrite(13, LOW);

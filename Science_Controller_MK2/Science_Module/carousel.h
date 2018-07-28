@@ -18,3 +18,11 @@ void carousel_init(int step_pin, int direction_pin)    {
     }
 
 }
+
+void motor_on(int pin)  {
+    digitalWrite(pin, HIGH);
+}
+
+void motor_off(int pin)  {
+    digitalWrite(pin, LOW);
+}

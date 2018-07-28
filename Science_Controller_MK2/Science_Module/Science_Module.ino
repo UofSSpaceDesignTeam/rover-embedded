@@ -1,7 +1,7 @@
 // Code to run and read data from science module instruments, including carousel, spectrometer, thermocouple, and moisture sensor
 
 #include "Robocluster.h"
-//#include "carousel.h"
+#include "carousel.h"
 #include "thermocouple.h"
 #include "moisture_sensor.h"
 #include "spectrometer.h"
@@ -14,15 +14,17 @@
 #define CAROUSEL_STEP  7
 #define DETECTOR_FEED  8
 #define EMITTER  5
-
-//TODO: discuss order of tasks
-//      one single command to analyse sample or one command per step
+#define MOTOR_POWER 4
 
 void move_carousel(char *data)  {
     int steps = atoi(data);
+    motor_on(MOTOR_POWER);
+    delay(10);
     for(int i=0; i<steps; i++) {
         step_motor(1, CAROUSEL_DIRECTION, CAROUSEL_STEP);
     }
+    delay(10);
+    motor_off(MOTOR_POWER);
 }
 
 void run_thermocouple(char *data)   {
@@ -64,25 +66,13 @@ void setup()    {
     digitalWrite(CAROUSEL_DIRECTION, LOW);
     digitalWrite(EMITTER,HIGH);
 
+    // Set up message handling
     set_name("ScienceArduino");
     int num_msgs = 5;
-    set_messages(num_msgs, "move_carousel", "run_thermocouple",       "run_moisture_probe", "run_emitter", "detector");
+    set_messages(num_msgs, "move_carousel", "run_thermocouple", "run_moisture_probe", "run_emitter", "detector");
     set_callbacks(num_msgs, move_carousel, run_thermocouple,
     run_moisture_probe, run_emitter, take_reading);
-    /* carousel_init(CAROUSEL_STEP, CAROUSEL_DIRECTION); */
 
-    /* emitter_on(EMITTER); */
-    /* int start_time = millis(); */
-    /* while (millis()-start_time < 500)    { */
-    /*     analyse_sample(); */
-    /*     // need a way to store this data */
-    /* } */
-    /* emitter_off(EMITTER); */
-    /*  */
-    /* //max.begin(); */
-    /*  */
-    /* s_delay(100); */
-    /*  */
     char buffer[BUFF_SIZE];
     sprintf(buffer, "{\"science_ready\":%i}", 1);
     Publish(buffer);

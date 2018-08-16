@@ -30,7 +30,7 @@
 
 void setup() {
     Serial.begin(115000);
-    //set_name("Limit Switch Array")
+    set_name("ScienceLimmits");
     pinMode(DRILL_1_TOP_SEND, OUTPUT);
     pinMode(DRILL_1_TOP_READ, INPUT);
     pinMode(DRILL_2_TOP_SEND, OUTPUT);

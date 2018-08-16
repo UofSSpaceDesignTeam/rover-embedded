@@ -5,12 +5,12 @@
 #include "thermocouple.h"
 #include "moisture_sensor.h"
 #include "spectrometer.h"
-#include "carousel.h"
 
 // Define Arduino Pins
 #define IR_SENSOR  A1
 #define MOIST_SENSOR  A2
 #define CAROUSEL_DIRECTION  6
+#define CAROUSEL_MOTOR 4
 #define CAROUSEL_STEP  7
 #define DETECTOR_FEED  8
 #define EMITTER  5
@@ -18,10 +18,17 @@
 
 void move_carousel(char *data)  {
     int steps = atoi(data);
+    int direction = 1;
+    if (steps > 0) {
+        direction = 1;
+    } else {
+        direction = 0;
+        steps *= -1;
+    }
     motor_on(MOTOR_POWER);
     delay(10);
     for(int i=0; i<steps; i++) {
-        step_motor(1, CAROUSEL_DIRECTION, CAROUSEL_STEP);
+        step_motor(direction, CAROUSEL_DIRECTION, CAROUSEL_STEP);
     }
     delay(10);
     motor_off(MOTOR_POWER);
@@ -50,6 +57,15 @@ void take_reading(char *data) {
     analyse_sample();
 }
 
+void toggle_carousel(char *data) {
+  int d = atoi(data);
+  if (d == 1) {
+    digitalWrite(CAROUSEL_MOTOR, LOW);
+  } else if (d == 0) {
+    digitalWrite(CAROUSEL_MOTOR, HIGH);
+  }
+}
+
 
 void setup()    {
     Serial.begin(115200);
@@ -69,7 +85,7 @@ void setup()    {
     // Set up message handling
     set_name("ScienceArduino");
     int num_msgs = 5;
-    set_messages(num_msgs, "move_carousel", "run_thermocouple", "run_moisture_probe", "run_emitter", "detector");
+    set_messages(num_msgs, "move_carousel", "run_thermocouple", "run_moisture_probe", "run_emitter", "take_reading");
     set_callbacks(num_msgs, move_carousel, run_thermocouple,
     run_moisture_probe, run_emitter, take_reading);
 
